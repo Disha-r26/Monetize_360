@@ -1,0 +1,148 @@
+[
+  {
+    "id": "aud_1790967750462",
+    "timestamp": "2026-10-02T19:02:30.462438+00:00",
+    "author": "Test Officer",
+    "action": "PUBLISH",
+    "domain_id": "hospitality",
+    "version": "1.1.0",
+    "details": {
+      "rules_count": 4,
+      "notes": "Production yield strategy rollout",
+      "lint_warnings_count": 0
+    },
+    "prev_hash": "GENESIS_HASH_000000000000000000000000000000000000000000000000000000",
+    "entry_hash": "b0e13604f8cc317d23639a07e8eba6da642d6612afff930cc2b5268b8fbe292c"
+  },
+  {
+    "id": "aud_1790967751708",
+    "timestamp": "2026-10-02T19:02:31.708880+00:00",
+    "author": "Pricing Manager",
+    "action": "ITEM_CREATE",
+    "domain_id": "hospitality",
+    "version": "1.1.0",
+    "details": {
+      "item_id": "test_item_custom",
+      "name": "Custom Penthouse",
+      "base_price": "550.00"
+    },
+    "prev_hash": "b0e13604f8cc317d23639a07e8eba6da642d6612afff930cc2b5268b8fbe292c",
+    "entry_hash": "e94a2b01388da3b947a3c25eb918f9328b807eb57a415c8788ad47e9c970dfc7"
+  },
+  {
+    "id": "aud_1790967775618",
+    "timestamp": "2026-10-02T19:02:55.618400+00:00",
+    "author": "Test Officer",
+    "action": "PUBLISH",
+    "domain_id": "hospitality",
+    "version": "1.2.0",
+    "details": {
+      "rules_count": 4,
+      "notes": "Production yield strategy rollout",
+      "lint_warnings_count": 0
+    },
+    "prev_hash": "e94a2b01388da3b947a3c25eb918f9328b807eb57a415c8788ad47e9c970dfc7",
+    "entry_hash": "3f0cc5eabd5a93d01efcde196dc8c8fa054c30dcac2828783128072f6f16d1ce"
+  },
+  {
+    "id": "aud_1790967775843",
+    "timestamp": "2026-10-02T19:02:55.843942+00:00",
+    "author": "Pricing Manager",
+    "action": "ITEM_CREATE",
+    "domain_id": "hospitality",
+    "version": "1.2.0",
+    "details": {
+      "item_id": "test_item_custom",
+      "name": "Custom Penthouse",
+      "base_price": "550.00"
+    },
+    "prev_hash": "3f0cc5eabd5a93d01efcde196dc8c8fa054c30dcac2828783128072f6f16d1ce",
+    "entry_hash": "09a319ca6a8f87173be4f0a675ae41e9ffbb3a92f0e584a7ab7e56933480db4d"
+  },
+  {
+    "id": "aud_1790967823422",
+    "timestamp": "2026-10-02T19:03:43.422576+00:00",
+    "author": "Test Officer",
+    "action": "PUBLISH",
+    "domain_id": "hospitality",
+    "version": "1.3.0",
+    "details": {
+      "rules_count": 4,
+      "notes": "Production yield strategy rollout",
+      "lint_warnings_count": 0
+    },
+    "prev_hash": "09a319ca6a8f87173be4f0a675ae41e9ffbb3a92f0e584a7ab7e56933480db4d",
+    "entry_hash": "65b7234a8e662e844b3991126792c1c418ac66ce69f3817dc8b02e7dda67e0f4"
+  },
+  {
+    "id": "aud_1790967823504",
+    "timestamp": "2026-10-02T19:03:43.504294+00:00",
+    "author": "Test Officer",
+    "action": "ROLLBACK",
+    "domain_id": "hospitality",
+    "version": "1.2.0",
+    "details": {
+      "reverted_to": "1.2.0"
+    },
+    "prev_hash": "65b7234a8e662e844b3991126792c1c418ac66ce69f3817dc8b02e7dda67e0f4",
+    "entry_hash": "1e1331c335a524885edbad52abbbbabdb02f704a290278cec4f173dce6e8f4ac"
+  },
+  {
+    "id": "aud_1790967823556",
+    "timestamp": "2026-10-02T19:03:43.556031+00:00",
+    "author": "Pricing Manager",
+    "action": "ITEM_CREATE",
+    "domain_id": "hospitality",
+    "version": "1.2.0",
+    "details": {
+      "item_id": "test_item_custom",
+      "name": "Custom Penthouse",
+      "base_price": "550.00"
+    },
+    "prev_hash": "1e1331c335a524885edbad52abbbbabdb02f704a290278cec4f173dce6e8f4ac",
+    "entry_hash": "ceaef6d5ee43c78d86f5688f98bf626259aa4204a6eda5335c8d49f796bb7f8e"
+  },
+  {
+    "id": "aud_1790968589036",
+    "timestamp": "2026-10-02T19:16:29.035986+00:00",
+    "author": "Test Officer",
+    "action": "PUBLISH",
+    "domain_id": "hospitality",
+    "version": "1.3.0",
+    "details": {
+      "rules_count": 4,
+      "notes": "Production yield strategy rollout",
+      "lint_warnings_count": 0
+    },
+    "prev_hash": "ceaef6d5ee43c78d86f5688f98bf626259aa4204a6eda5335c8d49f796bb7f8e",
+    "entry_hash": "841bbaf86287ebccf6be958b75ae37d8481023142ff846b146b7acb3e3ffa40e"
+  },
+  {
+    "id": "aud_1790968589126",
+    "timestamp": "2026-10-02T19:16:29.126787+00:00",
+    "author": "Test Officer",
+    "action": "ROLLBACK",
+    "domain_id": "hospitality",
+    "version": "1.3.0",
+    "details": {
+      "reverted_to": "1.3.0"
+    },
+    "prev_hash": "841bbaf86287ebccf6be958b75ae37d8481023142ff846b146b7acb3e3ffa40e",
+    "entry_hash": "61cff8cba4b94f95dfb6d998038c71b8e93d02e286379bdd4998e084ecc7038a"
+  },
+  {
+    "id": "aud_1790968589167",
+    "timestamp": "2026-10-02T19:16:29.167566+00:00",
+    "author": "Pricing Manager",
+    "action": "ITEM_CREATE",
+    "domain_id": "hospitality",
+    "version": "1.3.0",
+    "details": {
+      "item_id": "test_item_custom",
+      "name": "Custom Penthouse",
+      "base_price": "550.00"
+    },
+    "prev_hash": "61cff8cba4b94f95dfb6d998038c71b8e93d02e286379bdd4998e084ecc7038a",
+    "entry_hash": "bbe25e8bffe7176699cf1d93cc3249f6215f06d8c0313abdcd9ebf89baf6efdc"
+  }
+]

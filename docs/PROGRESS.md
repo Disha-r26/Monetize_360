@@ -1,36 +1,52 @@
-# Project Progress Tracker
+# Monetize360 Progress & Verification Log
 
-## Current Status: Phase 0 Complete -> Ready for Phase 1
+## Current Status: Integrated, Tested & Live at http://localhost:3000
 
-### Done (Phase 0: Scaffold and Conventions)
-- **Repository Assessment**: Detected uninitialized user profile workspace; initialized Git on `main` branch with portable `MinGit 2.48.1`.
-- **Airtight Security & Ignores**: Configured `.gitignore` strictly filtering user profile files, cache directories, and secrets (`.env`, `.env.local`, `.env.*.local`).
-- **Master Specification**: Created `docs/PROJECT_BRIEF.md` containing the complete specification and invariants.
-- **Architectural Decision Records**: Initialized `docs/DECISIONS.md` logging ADR-001 through ADR-006.
-- **System Architecture & Roadmap**: Detailed full 14-phase implementation plan in `docs/ARCHITECTURE.md`.
-- **Environment Configuration**: Created `.env.example` and local `.env.local` containing `GEMINI_API_KEY=` placeholder for developer local use.
-- **Monorepo Directory Scaffold**:
-  - `apps/web`: Next.js App Router workspace with dependencies in `package.json`.
-  - `apps/api`: FastAPI REST service structure.
-  - `engine`: Isolated pure Python domain-agnostic pricing package.
-  - `data/domains`: Declarative Domain Packs storage.
-  - `data/synthetic`: Seeded synthetic dataset storage.
-  - `data/tests`: Golden test suites and conflict cases.
-  - `docs/ADRs` & `docs/research`: Living architectural and domain documentation.
-  - `scripts`: Performance and feed automation tools.
-  - `tests`: Monorepo root and architecture tests.
-- **Configuration & Tooling**: Added `docker-compose.yml`, `Makefile`, `README.md`, and `requirements.txt`.
-- **Python Environment Provisioning**: Installed `fastapi`, `uvicorn`, `pydantic`, `sqlalchemy`, `httpx`, and `pytest`.
-- **Automated Architecture Guards**: Created `tests/test_architecture_guards.py` verifying AST absence of web/db imports and domain keywords. Ran pytest: 3/3 passed.
+### Done
+- **Mandatory Root Consolidated**: Project root confirmed as `C:\Users\Disha R\monetize`.
+- **Pure Domain-Agnostic Pricing Engine (`engine/`)**:
+  - Deterministic evaluation pipeline with pure Decimal precision arithmetic.
+  - Whitelisted AST safe expression evaluator (strictly prohibits `eval()`/`exec()`).
+  - Floor, ceiling, and margin guardrail enforcement.
+  - Rounding methods (`half_up`, `half_even`, `.99`, `.05`).
+  - Reproducible SHA-256 decision hash generation.
+  - Static configuration linter (`engine/linter.py`) detecting contradictory guardrails and impossible condition bounds.
+- **Declarative Domain Packs (`data/domains/`)**:
+  - 6 Domain Packs: Hospitality, Travel, Banking (% APR), E-Commerce, Ride-Hailing, and Cinema & Entertainment.
+  - Architecture guard verified: all 6 domains price deterministically with zero domain logic in the engine.
+- **FastAPI REST Backend (`apps/api/`)**:
+  - Endpoints for pricing evaluation, simulation curves, counterfactuals, live feed streaming, domain catalog, items, rules, and governance.
+  - Server-side Gemini AI Copilot provider with automatic fallback to deterministic offline rule generator.
+  - Cryptographically linked SHA-256 audit chain with tamper verification.
+  - Version history with safe publication and instant rollback.
+- **Next.js App Router Web UI (`apps/web/`)**:
+  - Unified entry point at `http://localhost:3000` with internal rewrites proxying `/api/*` to backend on port 8000.
+  - Design system with tokens: Ledger (`#F2F4F1`), Paper (`#FFFFFF`), Ink (`#13202C`), Marigold (`#E59A00`), Lagoon (`#0E8F83`), Cobalt (`#2F5BEA`), Coral (`#D9453D`).
+  - Interactive forward workflow:
+    - **Home**: Real-time Price Strip & Waterfall with ~600ms subtle recalculation pulse, interactive factor sliders, and quick health metrics.
+    - **1 Set Up (Items & Factors)**: Item catalog with Add/Delete item modal, Factor telemetry signals.
+    - **2 Build (Strategy Studio)**: Rule configurations, enable/disable toggles, rule deletion, and static linter check.
+    - **3 Test (Simulation Lab)**: Sweep factor scenario curves, interactive Counterfactual Sandbox ("What if?").
+    - **4 Go Live (Publish & Versions)**: Deployment checklist, publication trigger with version bump, version history with one-click rollback.
+    - **5 Monitor (Live Console)**: Real-time decision stream with tick hashes, pause/stream controls.
+    - **Understand (Explain & Audit)**: Waterfall step journey, factor contribution breakdown, cryptographic audit chain with tamper verification badge (`VERIFIED_SECURE`).
+    - **Contextual Copilot**: Interactive drawer (Ctrl+K) generating structured pricing rules from natural language.
+- **Verification & Automated Test Results**:
+  - **Pytest (19/19 passing)**:
+    - Architecture guards: Zero web/db imports in engine, zero domain keywords in engine, zero domain branches in engine, brand-new domain packs priceable without engine modifications.
+    - Engine tests: Safe math, unauthorized syntax blocking, deterministic Decimal evaluation, guardrails, counterfactuals.
+    - API tests: Health, domains, pricing evaluate, simulation, offline copilot.
+    - Governance tests: Contradictory guardrails linting, impossible conditions linting, publishing & rollback workflow, audit verification, live feed.
+  - **Frontend Checks**:
+    - `npx tsc --noEmit`: 0 TypeScript errors.
+    - `npm run lint`: 0 ESLint warnings or errors (`next/core-web-vitals`).
+    - `npm run build`: Production build compiled and statically optimized (4/4 pages).
+  - **End-to-End Port 3000 Integration Test** (`python scripts/test_integration.py`):
+    - All 7 verification checks passed (100%).
 
-### Next (Phase 1: Core Deterministic Pricing Engine & Tests)
-- Implement `engine/models.py` (Domain-agnostic dataclasses/Pydantic schemas: Item, Factor, Rule, Condition, Action, Guardrail, RoundingRule, EvaluationTrace).
-- Implement `engine/expressions.py` (Whitelisted AST safe expression evaluator with zero `eval()`/`exec()`).
-- Implement `engine/guardrails.py` (Floors, ceilings, margin constraints).
-- Implement `engine/rounding.py` (Precision and rounding rules with `Decimal`).
-- Implement `engine/evaluator.py` (Ordered deterministic pricing pipeline).
-- Implement `engine/trace.py` (Waterfall step logging and SHA-256 decision hash).
-- Implement comprehensive unit test suite in `engine/tests/`.
+### Startup & Operation
+- **Single Command**: `npm run dev` (or `make dev` / `python scripts/dev.py`)
+- **Single Application URL**: `http://localhost:3000`
 
-### Known Issues
-- None. Scaffolding is verified, clean, and reproducible.
+### Known Issues / Remaining Work
+- None. Full stack is verified, operational, and clean.

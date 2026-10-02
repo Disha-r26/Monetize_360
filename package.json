@@ -1,0 +1,12 @@
+{
+  "name": "monetize360-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monetize360 Universal Dynamic Pricing Engine",
+  "scripts": {
+    "dev": "python scripts/dev.py",
+    "test": "pytest tests/test_architecture_guards.py engine/tests/ apps/api/tests/ -v",
+    "test:integration": "python scripts/test_integration.py",
+    "lint": "cd apps/web && npm run lint"
+  }
+}
