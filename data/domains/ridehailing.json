@@ -1,0 +1,75 @@
+{
+  "id": "ridehailing",
+  "name": "Ride-Hailing",
+  "description": "On-demand mobility, distance-time base rates, real-time surge multipliers, and supply elasticity.",
+  "unit": "$",
+  "items": [
+    {
+      "id": "ride_standard",
+      "name": "City Standard Sedan (5 miles)",
+      "base_price": "14.50",
+      "unit": "$",
+      "attributes": { "vehicle_class": "standard", "distance_miles": 5.0, "est_minutes": 15 }
+    },
+    {
+      "id": "ride_xl",
+      "name": "Premium SUV (5 miles)",
+      "base_price": "26.00",
+      "unit": "$",
+      "attributes": { "vehicle_class": "xl", "distance_miles": 5.0, "est_minutes": 15 }
+    }
+  ],
+  "factors": [
+    { "name": "surge_ratio", "type": "number", "default": 1.45, "description": "Ratio of ride requests to active online vehicles" },
+    { "name": "weather_severity", "type": "number", "default": 0.0, "description": "Rain/snow index (0.0 clear to 2.0 blizzard)" },
+    { "name": "airport_zone", "type": "boolean", "default": false, "description": "Whether trip terminates at airport terminal" }
+  ],
+  "strategy": {
+    "domain_id": "ridehailing",
+    "version": "1.0.0",
+    "stages": ["demand", "time", "adjustments", "guardrails", "rounding"],
+    "rules": [
+      {
+        "id": "ride_dynamic_surge",
+        "name": "Dynamic Imbalance Surge",
+        "stage": "demand",
+        "description": "Multiply fare by surge ratio when surge > 1.10",
+        "conditions": [
+          { "field": "surge_ratio", "operator": ">", "value": 1.10 }
+        ],
+        "action": { "type": "formula", "value": "current_price * surge_ratio" },
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "ride_adverse_weather",
+        "name": "Severe Weather Supply Incentive",
+        "stage": "adjustments",
+        "description": "When weather severity >= 1.0, add $3.50 driver hazard stipend",
+        "conditions": [
+          { "field": "weather_severity", "operator": ">=", "value": 1.0 }
+        ],
+        "action": { "type": "additive", "value": "3.50" },
+        "priority": 20,
+        "enabled": true
+      },
+      {
+        "id": "ride_airport_toll",
+        "name": "Airport Facility Surcharge",
+        "stage": "adjustments",
+        "description": "Airport pickup or dropoff includes fixed $5.00 surcharge",
+        "conditions": [
+          { "field": "airport_zone", "operator": "==", "value": true }
+        ],
+        "action": { "type": "additive", "value": "5.00" },
+        "priority": 25,
+        "enabled": true
+      }
+    ],
+    "guardrails": [
+      { "id": "ride_min_fare", "name": "Minimum Base Fare Floor", "type": "floor", "value": "8.00", "hard": true, "enabled": true },
+      { "id": "ride_surge_cap", "name": "Anti-Gouging Surge Ceiling", "type": "ceiling", "value": "85.00", "hard": true, "enabled": true }
+    ],
+    "rounding": { "method": "nearest_0_05", "decimals": 2 }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "id": "hospitality",
+  "name": "Hospitality",
+  "description": "Hotel rooms, occupancy surge, length of stay discounts, and seasonal uplifts.",
+  "unit": "$",
+  "items": [
+    {
+      "id": "room_deluxe",
+      "name": "Deluxe King Room",
+      "base_price": "180.00",
+      "unit": "$",
+      "attributes": { "category": "premium", "max_occupancy": 2 }
+    },
+    {
+      "id": "room_suite",
+      "name": "Executive Suite",
+      "base_price": "320.00",
+      "unit": "$",
+      "attributes": { "category": "luxury", "max_occupancy": 4 }
+    }
+  ],
+  "factors": [
+    { "name": "occupancy_rate", "type": "number", "default": 0.75, "description": "Current property occupancy ratio (0.0 to 1.0)" },
+    { "name": "lead_days", "type": "number", "default": 14, "description": "Days remaining until check-in" },
+    { "name": "loyalty_tier", "type": "string", "default": "standard", "description": "Customer membership tier (standard, silver, gold, platinum)" },
+    { "name": "competitor_price", "type": "number", "default": 195.0, "description": "Average nearby 4-star room rate" }
+  ],
+  "strategy": {
+    "domain_id": "hospitality",
+    "version": "1.0.0",
+    "stages": ["demand", "customer", "time", "guardrails", "rounding"],
+    "rules": [
+      {
+        "id": "hosp_high_occupancy",
+        "name": "High Occupancy Surge",
+        "stage": "demand",
+        "description": "When occupancy exceeds 80%, increase price by 25%",
+        "conditions": [
+          { "field": "occupancy_rate", "operator": ">=", "value": 0.80 }
+        ],
+        "action": { "type": "percentage", "value": "25" },
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "hosp_moderate_occupancy",
+        "name": "Moderate Occupancy Uplift",
+        "stage": "demand",
+        "description": "When occupancy is between 65% and 80%, increase price by 10%",
+        "conditions": [
+          { "field": "occupancy_rate", "operator": ">=", "value": 0.65 },
+          { "field": "occupancy_rate", "operator": "<", "value": 0.80 }
+        ],
+        "action": { "type": "percentage", "value": "10" },
+        "priority": 15,
+        "enabled": true
+      },
+      {
+        "id": "hosp_gold_loyalty",
+        "name": "Gold Member Privilege",
+        "stage": "customer",
+        "description": "Gold and Platinum loyalty members receive a $15 discount",
+        "conditions": [
+          { "field": "loyalty_tier", "operator": "in", "value": ["gold", "platinum"] }
+        ],
+        "action": { "type": "additive", "value": "-15.00" },
+        "priority": 20,
+        "enabled": true
+      },
+      {
+        "id": "hosp_last_minute",
+        "name": "Last Minute Booking Discount",
+        "stage": "time",
+        "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+        "conditions": [
+          { "field": "lead_days", "operator": "<=", "value": 2 },
+          { "field": "occupancy_rate", "operator": "<", "value": 0.60 }
+        ],
+        "action": { "type": "percentage", "value": "-12" },
+        "priority": 30,
+        "enabled": true
+      }
+    ],
+    "guardrails": [
+      { "id": "hosp_floor", "name": "Housekeeping Cost Floor", "type": "floor", "value": "90.00", "hard": true, "enabled": true },
+      { "id": "hosp_ceiling", "name": "Maximum ADR Ceiling", "type": "ceiling", "value": "450.00", "hard": true, "enabled": true }
+    ],
+    "rounding": { "method": "half_up", "decimals": 2 }
+  }
+}

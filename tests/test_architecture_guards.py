@@ -109,3 +109,38 @@ def test_engine_has_no_domain_specific_keywords_in_logic():
                         assert not match, (
                             f"Domain keyword '{kw}' found in core engine logic at {file_path}:{line_idx}: {line.strip()}"
                         )
+
+
+def test_load_and_price_all_domain_packs_without_engine_changes():
+    """
+    Verification requirement: Load arbitrary Domain Packs without changing engine code
+    and successfully price them deterministically.
+    """
+    import json
+    from engine.models import Item, PricingContext, StrategyConfig
+    from engine.evaluator import PricingEngine
+
+    domains_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "domains"))
+    domain_files = [f for f in os.listdir(domains_dir) if f.endswith(".json")]
+    assert len(domain_files) >= 5, "At least 5 domain packs must be seeded"
+
+    engine = PricingEngine()
+
+    for df in domain_files:
+        path = os.path.join(domains_dir, df)
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        strategy = StrategyConfig(**data["strategy"])
+        factors = {fact["name"]: fact["default"] for fact in data["factors"]}
+
+        for item_data in data["items"]:
+            item = Item(**item_data)
+            context = PricingContext(item=item, factors=factors)
+            trace = engine.evaluate(context, strategy)
+
+            assert trace.final_price is not None
+            assert trace.decision_hash is not None
+            assert len(trace.decision_hash) == 64
+            assert len(trace.steps) >= 1
+

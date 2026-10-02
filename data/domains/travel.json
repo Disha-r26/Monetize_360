@@ -1,0 +1,62 @@
+{
+  "id": "travel",
+  "name": "Travel",
+  "description": "Airline flights, departure lead time curves, cabin load tiers, and route demand.",
+  "unit": "$",
+  "items": [
+    {
+      "id": "flight_eco",
+      "name": "Economy Non-Refundable Seat",
+      "base_price": "220.00",
+      "unit": "$",
+      "attributes": { "cabin": "economy", "route": "JFK-LHR" }
+    },
+    {
+      "id": "flight_bus",
+      "name": "Business Class Flat Bed",
+      "base_price": "1450.00",
+      "unit": "$",
+      "attributes": { "cabin": "business", "route": "JFK-LHR" }
+    }
+  ],
+  "factors": [
+    { "name": "load_factor", "type": "number", "default": 0.82, "description": "Booked cabin percentage (0.0 to 1.0)" },
+    { "name": "days_to_departure", "type": "number", "default": 7, "description": "Days remaining until flight takeoff" },
+    { "name": "fuel_index", "type": "number", "default": 1.10, "description": "Jet-A fuel cost index multiplier" }
+  ],
+  "strategy": {
+    "domain_id": "travel",
+    "version": "1.0.0",
+    "stages": ["demand", "time", "adjustments", "guardrails", "rounding"],
+    "rules": [
+      {
+        "id": "travel_tight_capacity",
+        "name": "High Load Factor Surge",
+        "stage": "demand",
+        "description": "If cabin load exceeds 85%, add 30% yield uplift",
+        "conditions": [
+          { "field": "load_factor", "operator": ">=", "value": 0.85 }
+        ],
+        "action": { "type": "percentage", "value": "30" },
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "travel_departure_proximity",
+        "name": "Departure Proximity Premium",
+        "stage": "time",
+        "description": "If departure is within 3 days, add $45 express booking fee",
+        "conditions": [
+          { "field": "days_to_departure", "operator": "<=", "value": 3 }
+        ],
+        "action": { "type": "additive", "value": "45.00" },
+        "priority": 20,
+        "enabled": true
+      }
+    ],
+    "guardrails": [
+      { "id": "travel_min_margin", "name": "Direct Operating Cost Floor", "type": "floor", "value": "110.00", "hard": true, "enabled": true }
+    ],
+    "rounding": { "method": "nearest_point_99", "decimals": 2 }
+  }
+}

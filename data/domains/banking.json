@@ -1,0 +1,75 @@
+{
+  "id": "banking",
+  "name": "Banking",
+  "description": "Personal & auto loans, risk score tiers, loan-to-value offsets, prime rate spreads, and APR.",
+  "unit": "% APR",
+  "items": [
+    {
+      "id": "loan_personal",
+      "name": "Unsecured Personal Term Loan (36mo)",
+      "base_price": "5.50",
+      "unit": "% APR",
+      "attributes": { "term_months": 36, "secured": false }
+    },
+    {
+      "id": "loan_auto",
+      "name": "New Vehicle Auto Loan (60mo)",
+      "base_price": "4.25",
+      "unit": "% APR",
+      "attributes": { "term_months": 60, "secured": true }
+    }
+  ],
+  "factors": [
+    { "name": "credit_tier", "type": "string", "default": "prime", "description": "Applicant credit score tier (super_prime, prime, near_prime, subprime)" },
+    { "name": "ltv_ratio", "type": "number", "default": 0.80, "description": "Loan-to-value collateral coverage (0.0 to 1.5)" },
+    { "name": "central_bank_prime", "type": "number", "default": 3.75, "description": "Underlying benchmark prime interest rate" }
+  ],
+  "strategy": {
+    "domain_id": "banking",
+    "version": "1.0.0",
+    "stages": ["customer", "adjustments", "guardrails", "rounding"],
+    "rules": [
+      {
+        "id": "bank_subprime_risk",
+        "name": "Subprime Risk Premium",
+        "stage": "customer",
+        "description": "Subprime applicants require +4.25% risk offset spread",
+        "conditions": [
+          { "field": "credit_tier", "operator": "==", "value": "subprime" }
+        ],
+        "action": { "type": "additive", "value": "4.25" },
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "bank_super_prime_discount",
+        "name": "Super Prime Preferred Rate",
+        "stage": "customer",
+        "description": "Super prime tier receives 0.75% rate discount",
+        "conditions": [
+          { "field": "credit_tier", "operator": "==", "value": "super_prime" }
+        ],
+        "action": { "type": "additive", "value": "-0.75" },
+        "priority": 15,
+        "enabled": true
+      },
+      {
+        "id": "bank_high_ltv",
+        "name": "High LTV Collateral Spread",
+        "stage": "adjustments",
+        "description": "If LTV ratio exceeds 90%, add 0.50% risk margin",
+        "conditions": [
+          { "field": "ltv_ratio", "operator": ">=", "value": 0.90 }
+        ],
+        "action": { "type": "additive", "value": "0.50" },
+        "priority": 25,
+        "enabled": true
+      }
+    ],
+    "guardrails": [
+      { "id": "bank_usury_ceiling", "name": "Regulatory Rate Cap", "type": "ceiling", "value": "24.99", "hard": true, "enabled": true },
+      { "id": "bank_cost_of_funds_floor", "name": "Cost of Funds Floor", "type": "floor", "value": "3.50", "hard": true, "enabled": true }
+    ],
+    "rounding": { "method": "half_up", "decimals": 2 }
+  }
+}

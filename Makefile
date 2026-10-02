@@ -1,4 +1,7 @@
-.PHONY: install test test-engine test-api test-guards run-api run-web clean
+.PHONY: install test test-engine test-api test-guards run-api run-web dev clean
+
+dev:
+	python scripts/dev.py
 
 install:
 	python -m pip install -r requirements.txt

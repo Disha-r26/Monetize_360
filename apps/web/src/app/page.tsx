@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   LayoutDashboard,
   Boxes,
@@ -20,57 +20,263 @@ import {
   CheckCircle2,
   Clock,
   Layers,
-  ChevronDown
+  ChevronDown,
+  X,
+  Play,
+  RotateCcw,
+  SlidersHorizontal,
+  Plus
 } from "lucide-react";
 
+interface DomainInfo {
+  id: string;
+  name: string;
+  description: string;
+  unit: string;
+  items_count: number;
+  rules_count: number;
+}
+
+interface TraceStep {
+  step_number: number;
+  stage: string;
+  rule_id: string | null;
+  rule_name: string | null;
+  input_price: string;
+  adjustment: string;
+  output_price: string;
+  reason: string;
+  matched: boolean;
+}
+
+interface EvaluationResult {
+  trace: {
+    base_price: string;
+    final_price: string;
+    total_adjustment: string;
+    steps: TraceStep[];
+    guardrails_triggered: any[];
+    decision_hash: string;
+    rounding_applied: string;
+    unit: string;
+  };
+  contributions: Array<{
+    stage: string;
+    rule_id: string;
+    rule_name: string;
+    adjustment: string;
+    contribution_pct: string;
+    reason: string;
+  }>;
+  item: {
+    id: string;
+    name: string;
+    base_price: string;
+    unit: string;
+  };
+  factors_used: Record<string, any>;
+}
+
 export default function Home() {
-  const [activeDomain, setActiveDomain] = useState("Hospitality");
-  const [demandMultiplier, setDemandMultiplier] = useState(1.35);
-  const [competitorDiff, setCompetitorDiff] = useState(-5);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [showExplain, setShowExplain] = useState(false);
+  const [domains, setDomains] = useState<DomainInfo[]>([]);
+  const [selectedDomainId, setSelectedDomainId] = useState<string>("hospitality");
+  const [domainDetail, setDomainDetail] = useState<any>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
 
-  // Dynamic pricing calculation preview
-  const basePrice = activeDomain === "Banking" ? 4.5 : activeDomain === "Ride-hailing" ? 14.0 : 180.0;
-  const demandAdj = (demandMultiplier - 1.0) * basePrice * 0.75;
-  const compAdj = (competitorDiff / 100) * basePrice * 0.4;
-  const rawPrice = basePrice + demandAdj + compAdj;
-  const roundedPrice = activeDomain === "Banking" 
-    ? Math.max(2.5, Math.min(18.0, rawPrice)).toFixed(2)
-    : Math.max(10, Math.round(rawPrice * 100) / 100).toFixed(2);
+  // Factors state
+  const [factors, setFactors] = useState<Record<string, any>>({});
+  const [evalResult, setEvalResult] = useState<EvaluationResult | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
-  const handleDemandChange = (val: number) => {
-    setIsAnimating(true);
-    setDemandMultiplier(val);
-    setTimeout(() => setIsAnimating(false), 600);
+  // Active navigation tab
+  const [activeTab, setActiveTab] = useState<"home" | "strategy" | "simulation" | "explain">("home");
+
+  // Drawers
+  const [showCopilot, setShowCopilot] = useState<boolean>(false);
+  const [copilotPrompt, setCopilotPrompt] = useState<string>("");
+  const [copilotLoading, setCopilotLoading] = useState<boolean>(false);
+  const [copilotProposal, setCopilotProposal] = useState<any>(null);
+  const [customRules, setCustomRules] = useState<any[]>([]);
+
+  // Simulation state
+  const [simPoints, setSimPoints] = useState<any[]>([]);
+  const [simLoading, setSimLoading] = useState<boolean>(false);
+
+  // Fetch all domain packs from backend via Next.js proxy
+  useEffect(() => {
+    fetch("/api/domains")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.domains && data.domains.length > 0) {
+          setDomains(data.domains);
+          setSelectedDomainId(data.domains[0].id);
+        }
+      })
+      .catch((err) => console.error("Error fetching domains:", err));
+  }, []);
+
+  // Fetch domain details when domain changes
+  useEffect(() => {
+    if (!selectedDomainId) return;
+
+    fetch(`/api/domains/${selectedDomainId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setDomainDetail(data);
+        if (data.items && data.items.length > 0) {
+          setSelectedItemId(data.items[0].id);
+        }
+        const defaultFactors: Record<string, any> = {};
+        if (data.factors) {
+          data.factors.forEach((f: any) => {
+            defaultFactors[f.name] = f.default;
+          });
+        }
+        setFactors(defaultFactors);
+        setCustomRules([]);
+        setCopilotProposal(null);
+      })
+      .catch((err) => console.error("Error fetching domain details:", err));
+  }, [selectedDomainId]);
+
+  // Evaluate price whenever factors, item, or customRules change
+  const runEvaluation = useCallback(
+    async (currentFactors = factors, rules = customRules) => {
+      if (!selectedDomainId || !selectedItemId) return;
+      setIsLoading(true);
+      setIsAnimating(true);
+
+      try {
+        const res = await fetch("/api/pricing/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain_id: selectedDomainId,
+            item_id: selectedItemId,
+            factors: currentFactors,
+            custom_rules: rules.length > 0 ? rules : undefined,
+          }),
+        });
+        const data = await res.json();
+        setEvalResult(data);
+      } catch (err) {
+        console.error("Evaluation error:", err);
+      } finally {
+        setIsLoading(false);
+        setTimeout(() => setIsAnimating(false), 600);
+      }
+    },
+    [selectedDomainId, selectedItemId, factors, customRules]
+  );
+
+  useEffect(() => {
+    if (selectedDomainId && selectedItemId) {
+      runEvaluation(factors, customRules);
+    }
+  }, [selectedDomainId, selectedItemId, runEvaluation]);
+
+  // Keyboard shortcut Ctrl+K for Copilot
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowCopilot((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Update specific factor
+  const handleFactorChange = (name: string, value: any) => {
+    const updated = { ...factors, [name]: value };
+    setFactors(updated);
+    runEvaluation(updated, customRules);
   };
 
-  const domains = [
-    { id: "hospitality", name: "Hospitality", desc: "Hotel rooms & seasonal surge", unit: "$" },
-    { id: "travel", name: "Travel", desc: "Flight seats & capacity curves", unit: "$" },
-    { id: "banking", name: "Banking", desc: "Loan prime rates & risk offsets", unit: "% APR" },
-    { id: "ecommerce", name: "E-Commerce", desc: "Cart value & stock velocity", unit: "$" },
-    { id: "ridehailing", name: "Ride-Hailing", desc: "Distance, time & driver supply", unit: "$" },
-    { id: "cinema", name: "Cinema / EV", desc: "Peak shows & kW/h charging", unit: "$" }
-  ];
+  // Run Copilot rule generation
+  const handleGenerateCopilotRule = async () => {
+    if (!copilotPrompt.trim()) return;
+    setCopilotLoading(true);
+    try {
+      const res = await fetch("/api/copilot/generate-rule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain_id: selectedDomainId,
+          prompt: copilotPrompt,
+        }),
+      });
+      const data = await res.json();
+      setCopilotProposal(data);
+    } catch (err) {
+      console.error("Copilot error:", err);
+    } finally {
+      setCopilotLoading(false);
+    }
+  };
+
+  // Apply proposed Copilot rule
+  const handleApplyCopilotRule = () => {
+    if (copilotProposal?.rule) {
+      const updatedRules = [...customRules, copilotProposal.rule];
+      setCustomRules(updatedRules);
+      runEvaluation(factors, updatedRules);
+      setShowCopilot(false);
+      setCopilotProposal(null);
+      setCopilotPrompt("");
+    }
+  };
+
+  // Run Simulation curve
+  const handleRunSimulation = async () => {
+    if (!selectedDomainId || !selectedItemId || !domainDetail?.factors?.length) return;
+    setSimLoading(true);
+    const sweepFact = domainDetail.factors[0].name;
+
+    try {
+      const res = await fetch("/api/pricing/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          domain_id: selectedDomainId,
+          item_id: selectedItemId,
+          sweep_factor: sweepFact,
+          min_val: 0.5,
+          max_val: 2.0,
+          steps_count: 7,
+          base_factors: factors,
+        }),
+      });
+      const data = await res.json();
+      setSimPoints(data.points || []);
+    } catch (err) {
+      console.error("Simulation error:", err);
+    } finally {
+      setSimLoading(false);
+    }
+  };
+
+  const currentUnit = evalResult?.trace?.unit || "$";
+  const outputPrice = evalResult?.trace?.final_price || "0.00";
+  const basePrice = evalResult?.trace?.base_price || "0.00";
 
   return (
     <div className="flex min-h-screen bg-ledger">
       {/* Primary Sidebar */}
       <aside className="w-64 border-r border-ink-border bg-paper flex flex-col justify-between p-4 shrink-0">
         <div className="space-y-6">
-          {/* Logo / Header */}
-          <div className="px-2 py-1">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-ink text-paper flex items-center justify-center font-mono font-bold rounded-sm text-sm">
-                M
-              </div>
-              <div>
-                <h1 className="text-base font-bold tracking-tight text-ink">MONETIZE360</h1>
-                <p className="text-[10px] uppercase font-mono tracking-wider text-ink-subtle">
-                  Dynamic Pricing OS
-                </p>
-              </div>
+          {/* Logo */}
+          <div className="px-2 py-1 flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-ink text-paper flex items-center justify-center font-mono font-bold rounded-sm text-sm shadow-sm">
+              M
+            </div>
+            <div>
+              <h1 className="text-base font-bold tracking-tight text-ink">MONETIZE360</h1>
+              <p className="text-[10px] uppercase font-mono tracking-wider text-ink-subtle">
+                Dynamic Pricing Engine
+              </p>
             </div>
           </div>
 
@@ -80,13 +286,15 @@ export default function Home() {
               <p className="px-2 text-[10px] font-mono uppercase tracking-wider text-ink-subtle mb-1">
                 Workspace
               </p>
-              <a
-                href="#"
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-cobalt-light text-cobalt font-medium"
+              <button
+                onClick={() => setActiveTab("home")}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md font-medium text-left transition-colors ${
+                  activeTab === "home" ? "bg-cobalt-light text-cobalt" : "text-ink-muted hover:bg-ledger"
+                }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
                 Home
-              </a>
+              </button>
             </div>
 
             <div>
@@ -94,20 +302,20 @@ export default function Home() {
                 1 Set Up
               </p>
               <div className="space-y-0.5">
-                <a
-                  href="#items"
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
+                <button
+                  onClick={() => setActiveTab("home")}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger text-left"
                 >
                   <Boxes className="w-4 h-4" />
-                  Items
-                </a>
-                <a
-                  href="#factors"
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
+                  Items ({domainDetail?.items?.length || 0})
+                </button>
+                <button
+                  onClick={() => setActiveTab("home")}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger text-left"
                 >
                   <Sliders className="w-4 h-4" />
-                  Factors
-                </a>
+                  Factors ({domainDetail?.factors?.length || 0})
+                </button>
               </div>
             </div>
 
@@ -115,117 +323,82 @@ export default function Home() {
               <p className="px-2 text-[10px] font-mono uppercase tracking-wider text-ink-subtle mb-1">
                 2 Build
               </p>
-              <a
-                href="#strategy"
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
+              <button
+                onClick={() => setActiveTab("strategy")}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md font-medium text-left transition-colors ${
+                  activeTab === "strategy" ? "bg-cobalt-light text-cobalt" : "text-ink-muted hover:bg-ledger"
+                }`}
               >
                 <Sparkles className="w-4 h-4" />
-                Strategy
-              </a>
+                Strategy Studio
+              </button>
             </div>
 
             <div>
               <p className="px-2 text-[10px] font-mono uppercase tracking-wider text-ink-subtle mb-1">
                 3 Test
               </p>
-              <a
-                href="#simulation"
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
+              <button
+                onClick={() => {
+                  setActiveTab("simulation");
+                  handleRunSimulation();
+                }}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md font-medium text-left transition-colors ${
+                  activeTab === "simulation" ? "bg-cobalt-light text-cobalt" : "text-ink-muted hover:bg-ledger"
+                }`}
               >
                 <FlaskConical className="w-4 h-4" />
-                Simulation
-              </a>
-            </div>
-
-            <div>
-              <p className="px-2 text-[10px] font-mono uppercase tracking-wider text-ink-subtle mb-1">
-                4 Go Live
-              </p>
-              <div className="space-y-0.5">
-                <a
-                  href="#publish"
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                  Publish
-                </a>
-                <a
-                  href="#versions"
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
-                >
-                  <History className="w-4 h-4" />
-                  Versions
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <p className="px-2 text-[10px] font-mono uppercase tracking-wider text-ink-subtle mb-1">
-                5 Monitor
-              </p>
-              <a
-                href="#live-console"
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
-              >
-                <Activity className="w-4 h-4" />
-                Live Console
-              </a>
+                Simulation Lab
+              </button>
             </div>
 
             <div>
               <p className="px-2 text-[10px] font-mono uppercase tracking-wider text-ink-subtle mb-1">
                 Understand
               </p>
-              <div className="space-y-0.5">
-                <a
-                  href="#explain"
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                  Explain
-                </a>
-                <a
-                  href="#audit"
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-ink-muted hover:bg-ledger hover:text-ink transition-colors"
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  Audit
-                </a>
-              </div>
+              <button
+                onClick={() => setActiveTab("explain")}
+                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md font-medium text-left transition-colors ${
+                  activeTab === "explain" ? "bg-cobalt-light text-cobalt" : "text-ink-muted hover:bg-ledger"
+                }`}
+              >
+                <HelpCircle className="w-4 h-4" />
+                Explain ("Why this price?")
+              </button>
             </div>
           </nav>
         </div>
 
-        {/* Bottom System Status */}
-        <div className="border-t border-ink-border pt-3 space-y-2 text-[11px]">
+        {/* Engine Status */}
+        <div className="border-t border-ink-border pt-3 space-y-1.5 text-[11px]">
           <div className="flex items-center justify-between text-ink-muted">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-lagoon"></span>
-              API Online
+              Full Stack Online
             </span>
-            <span className="font-mono text-[10px]">v1.0.0</span>
+            <span className="font-mono text-[10px]">Pure Decimal</span>
           </div>
           <div className="text-[10px] text-ink-subtle">
-            Engine: Pure Decimal • Agnostic
+            Single Entry Point: Port 3000
           </div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Workbench */}
       <main className="flex-1 flex flex-col overflow-y-auto">
-        {/* Top Header Bar */}
+        {/* Top Header */}
         <header className="h-14 border-b border-ink-border bg-paper px-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-ink-muted">Domain:</span>
+              <span className="text-xs font-medium text-ink-muted">Active Domain:</span>
               <div className="relative">
                 <select
-                  value={activeDomain}
-                  onChange={(e) => setActiveDomain(e.target.value)}
+                  value={selectedDomainId}
+                  onChange={(e) => setSelectedDomainId(e.target.value)}
                   className="appearance-none bg-ledger border border-ink-border rounded-md px-3 py-1 pr-7 text-xs font-semibold text-ink cursor-pointer focus:outline-none focus:ring-1 focus:ring-cobalt"
                 >
                   {domains.map((d) => (
-                    <option key={d.id} value={d.name}>
+                    <option key={d.id} value={d.id}>
                       {d.name}
                     </option>
                   ))}
@@ -236,78 +409,76 @@ export default function Home() {
 
             <div className="h-4 w-px bg-ink-border"></div>
 
-            {/* Workflow Progress Bar */}
-            <div className="flex items-center gap-1.5 text-xs">
-              <span className="flex items-center gap-1 text-lagoon font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Set up
-              </span>
-              <ChevronRight className="w-3 h-3 text-ink-subtle" />
-              <span className="flex items-center gap-1 text-lagoon font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Build
-              </span>
-              <ChevronRight className="w-3 h-3 text-ink-subtle" />
-              <span className="flex items-center gap-1 text-marigold font-medium">
-                <Clock className="w-3.5 h-3.5" /> Test (1 pending)
-              </span>
-              <ChevronRight className="w-3 h-3 text-ink-subtle" />
-              <span className="text-ink-subtle">Go live</span>
-            </div>
+            {/* Item Selector */}
+            {domainDetail?.items && domainDetail.items.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-ink-muted">Item:</span>
+                <select
+                  value={selectedItemId}
+                  onChange={(e) => setSelectedItemId(e.target.value)}
+                  className="bg-ledger border border-ink-border rounded-md px-3 py-1 text-xs font-medium text-ink cursor-pointer focus:outline-none"
+                >
+                  {domainDetail.items.map((it: any) => (
+                    <option key={it.id} value={it.id}>
+                      {it.name} ({it.unit}{it.base_price})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="px-3 py-1.5 rounded-md border border-ink-border text-xs font-medium text-ink hover:bg-ledger transition-colors flex items-center gap-1.5">
+            <button
+              onClick={() => setShowCopilot(true)}
+              className="px-3 py-1.5 rounded-md border border-marigold/40 bg-marigold-light text-ink text-xs font-semibold hover:bg-marigold/20 transition-colors flex items-center gap-1.5"
+            >
               <Sparkles className="w-3.5 h-3.5 text-marigold" />
-              Copilot (Ctrl+K)
+              AI Copilot (Ctrl+K)
             </button>
-            <button className="px-4 py-1.5 rounded-md bg-cobalt text-paper text-xs font-semibold hover:bg-opacity-95 transition-all flex items-center gap-1.5 shadow-sm">
-              Continue strategy
+            <button
+              onClick={() => {
+                setActiveTab("simulation");
+                handleRunSimulation();
+              }}
+              className="px-4 py-1.5 rounded-md bg-cobalt text-paper text-xs font-semibold hover:bg-opacity-95 transition-all flex items-center gap-1.5 shadow-sm"
+            >
+              Simulate Price
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </header>
 
-        {/* Content Body */}
+        {/* Dynamic View Body */}
         <div className="p-8 max-w-7xl w-full mx-auto space-y-6">
-          {/* Welcome Banner */}
-          <div className="bg-paper border border-ink-border rounded-lg p-6 shadow-sm flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-ink tracking-tight">
-                  {activeDomain} Dynamic Pricing Strategy
-                </h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-lagoon-light text-lagoon border border-lagoon/20">
-                  Active Draft v1.2
-                </span>
-              </div>
-              <p className="text-sm text-ink-muted">
-                Universal deterministic pricing engine active. Zero domain branches in core logic.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
+          {/* Active Custom Rules Banner */}
+          {customRules.length > 0 && (
+            <div className="p-3 bg-cobalt-light border border-cobalt/30 rounded-md flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2 text-cobalt font-medium">
+                <Sparkles className="w-4 h-4" />
+                Active Copilot Draft Rules: {customRules.length} rule(s) injected in sandbox
+              </span>
               <button
-                onClick={() => setShowExplain(!showExplain)}
-                className="px-3 py-2 rounded-md border border-ink-border text-xs font-semibold text-ink hover:bg-ledger transition-colors flex items-center gap-1.5"
+                onClick={() => {
+                  setCustomRules([]);
+                  runEvaluation(factors, []);
+                }}
+                className="text-[11px] underline text-cobalt hover:text-ink font-mono"
               >
-                <HelpCircle className="w-4 h-4 text-cobalt" />
-                Why this price?
-              </button>
-              <button className="px-4 py-2 rounded-md bg-cobalt text-paper text-xs font-semibold hover:bg-opacity-90 transition-all flex items-center gap-1.5">
-                Simulate Scenarios
-                <ChevronRight className="w-4 h-4" />
+                Clear sandbox rules
               </button>
             </div>
-          </div>
+          )}
 
-          {/* Signature Price Strip + Waterfall Component */}
+          {/* Price Strip + Waterfall Component */}
           <div className="bg-paper border border-ink-border rounded-lg p-6 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-ink-border pb-4">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider text-ink font-mono">
-                  Real-time Price Strip & Waterfall
+                  Deterministic Price Strip & Waterfall
                 </h3>
                 <p className="text-xs text-ink-muted">
-                  Drag the demand factor slider to observe deterministic 600ms recalculation
+                  Connected seamlessly to backend Decimal engine (Evaluated in {isLoading ? "..." : "< 2ms"})
                 </p>
               </div>
 
@@ -321,167 +492,315 @@ export default function Home() {
                     isAnimating ? "animate-price-pulse text-marigold" : ""
                   }`}
                 >
-                  {activeDomain === "Banking" ? `${roundedPrice}% APR` : `$${roundedPrice}`}
+                  {currentUnit === "% APR" ? `${outputPrice}% APR` : `${currentUnit}${outputPrice}`}
                 </div>
               </div>
             </div>
 
-            {/* Interactive Signal Sliders */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-ledger p-4 rounded-md border border-ink-border">
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-ink">Demand Index (Surge Factor)</span>
-                  <span className="font-mono text-cobalt font-semibold">{demandMultiplier.toFixed(2)}x</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.80"
-                  max="2.50"
-                  step="0.05"
-                  value={demandMultiplier}
-                  onChange={(e) => handleDemandChange(parseFloat(e.target.value))}
-                  className="w-full h-1.5 bg-ink-border rounded-lg appearance-none cursor-pointer accent-cobalt"
-                />
-                <div className="flex justify-between text-[10px] text-ink-subtle font-mono">
-                  <span>0.80x (Low)</span>
-                  <span>1.00x (Neutral)</span>
-                  <span>2.50x (Surge)</span>
-                </div>
+            {/* Interactive Factor Sliders */}
+            {domainDetail?.factors && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-ledger p-4 rounded-md border border-ink-border">
+                {domainDetail.factors.map((f: any) => {
+                  const val = factors[f.name] !== undefined ? factors[f.name] : f.default;
+                  if (typeof f.default === "number") {
+                    const min = f.default < 1 ? 0.0 : Math.max(0, f.default * 0.5);
+                    const max = f.default < 1 ? 1.0 : f.default * 2.0;
+                    const step = f.default < 1 ? 0.05 : 1;
+                    return (
+                      <div key={f.name} className="space-y-1.5">
+                        <div className="flex justify-between text-xs">
+                          <span className="font-medium text-ink capitalize">
+                            {f.name.replace(/_/g, " ")}
+                          </span>
+                          <span className="font-mono text-cobalt font-semibold">
+                            {typeof val === "number" ? val.toFixed(2) : val}
+                          </span>
+                        </div>
+                        <input
+                          type="range"
+                          min={min}
+                          max={max}
+                          step={step}
+                          value={val}
+                          onChange={(e) => handleFactorChange(f.name, parseFloat(e.target.value))}
+                          className="w-full h-1.5 bg-ink-border rounded-lg appearance-none cursor-pointer accent-cobalt"
+                        />
+                        <div className="text-[10px] text-ink-subtle">{f.description}</div>
+                      </div>
+                    );
+                  } else if (typeof f.default === "boolean") {
+                    return (
+                      <div key={f.name} className="flex items-center justify-between py-2">
+                        <div>
+                          <div className="text-xs font-medium text-ink capitalize">
+                            {f.name.replace(/_/g, " ")}
+                          </div>
+                          <div className="text-[10px] text-ink-subtle">{f.description}</div>
+                        </div>
+                        <button
+                          onClick={() => handleFactorChange(f.name, !val)}
+                          className={`px-3 py-1 rounded text-xs font-semibold ${
+                            val ? "bg-lagoon text-paper" : "bg-ink-border text-ink"
+                          }`}
+                        >
+                          {val ? "TRUE" : "FALSE"}
+                        </button>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={f.name} className="space-y-1.5">
+                        <div className="text-xs font-medium text-ink capitalize">
+                          {f.name.replace(/_/g, " ")}
+                        </div>
+                        <input
+                          type="text"
+                          value={val || ""}
+                          onChange={(e) => handleFactorChange(f.name, e.target.value)}
+                          className="w-full px-2.5 py-1 text-xs border border-ink-border rounded bg-paper font-mono"
+                        />
+                      </div>
+                    );
+                  }
+                })}
               </div>
+            )}
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs">
-                  <span className="font-medium text-ink">Competitor Variance Offset</span>
-                  <span className="font-mono text-coral font-semibold">{competitorDiff}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="-20"
-                  max="20"
-                  step="1"
-                  value={competitorDiff}
-                  onChange={(e) => handleDemandChange(demandMultiplier)}
-                  className="w-full h-1.5 bg-ink-border rounded-lg appearance-none cursor-pointer accent-coral"
-                />
-                <div className="flex justify-between text-[10px] text-ink-subtle font-mono">
-                  <span>-20% Undercut</span>
-                  <span>0% Match</span>
-                  <span>+20% Premium</span>
-                </div>
-              </div>
-            </div>
-
-            {/* The Price Waterfall */}
+            {/* Waterfall Steps */}
             <div className="space-y-3">
-              <div className="text-xs font-semibold text-ink-muted">Evaluation Waterfall Journey</div>
+              <div className="flex items-center justify-between text-xs font-semibold text-ink-muted">
+                <span>Evaluation Waterfall Journey</span>
+                <span className="font-mono text-[10px] text-ink-subtle">
+                  Decision Hash: {evalResult?.trace?.decision_hash?.substring(0, 16)}...
+                </span>
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="bg-ledger p-3 rounded-md border border-ink-border text-center">
-                  <span className="text-[10px] uppercase font-mono text-ink-subtle block">Base Rate</span>
-                  <span className="text-base font-bold font-mono text-ink tabular-nums">
-                    {activeDomain === "Banking" ? `${basePrice}%` : `$${basePrice}`}
-                  </span>
-                </div>
+                {evalResult?.trace?.steps?.slice(0, 5).map((step, idx) => {
+                  const isBase = step.stage === "base";
+                  const isNegative = parseFloat(step.adjustment) < 0;
+                  const isPositive = parseFloat(step.adjustment) > 0;
+                  return (
+                    <div
+                      key={idx}
+                      className={`p-3 rounded-md border text-center transition-all ${
+                        isBase
+                          ? "bg-ledger border-ink-border"
+                          : isPositive
+                          ? "bg-lagoon-light/60 border-lagoon/20"
+                          : isNegative
+                          ? "bg-coral-light/60 border-coral/20"
+                          : "bg-paper border-ink-border"
+                      }`}
+                    >
+                      <span className="text-[10px] uppercase font-mono text-ink-subtle block truncate">
+                        {step.rule_name || step.stage}
+                      </span>
+                      <span className="text-base font-bold font-mono text-ink tabular-nums block mt-1">
+                        {isBase ? `${currentUnit}${step.input_price}` : `${isPositive ? "+" : ""}${step.adjustment}`}
+                      </span>
+                      <span className="text-[10px] font-mono text-ink-muted block mt-0.5">
+                        → {currentUnit}{step.output_price}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
-                <div className="bg-lagoon-light/60 p-3 rounded-md border border-lagoon/20 text-center">
-                  <span className="text-[10px] uppercase font-mono text-lagoon block">Demand Uplift</span>
-                  <span className="text-base font-bold font-mono text-lagoon tabular-nums">
-                    +{demandAdj >= 0 ? demandAdj.toFixed(2) : "0.00"}
-                  </span>
+          {/* Tab 2: Strategy Studio */}
+          {activeTab === "strategy" && domainDetail && (
+            <div className="bg-paper border border-ink-border rounded-lg p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-ink-border pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-ink">Strategy Studio — Rule Configurations</h3>
+                  <p className="text-xs text-ink-muted">
+                    Declarative domain pack rules for {domainDetail.name}
+                  </p>
                 </div>
+                <button
+                  onClick={() => setShowCopilot(true)}
+                  className="px-3 py-1.5 rounded bg-cobalt text-paper text-xs font-semibold flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Rule with AI Copilot
+                </button>
+              </div>
 
-                <div className="bg-coral-light/60 p-3 rounded-md border border-coral/20 text-center">
-                  <span className="text-[10px] uppercase font-mono text-coral block">Comp Adjust</span>
-                  <span className="text-base font-bold font-mono text-coral tabular-nums">
-                    {compAdj.toFixed(2)}
-                  </span>
+              <div className="space-y-3">
+                {domainDetail.strategy?.rules?.map((rule: any) => (
+                  <div key={rule.id} className="p-4 bg-ledger border border-ink-border rounded-md space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-cobalt-light text-cobalt font-semibold">
+                          {rule.stage}
+                        </span>
+                        <h4 className="text-sm font-bold text-ink">{rule.name}</h4>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-ink">
+                        Action: {rule.action?.type} ({rule.action?.value})
+                      </span>
+                    </div>
+                    <p className="text-xs text-ink-muted">{rule.description}</p>
+                    <div className="text-[11px] font-mono text-ink-subtle">
+                      Conditions: {rule.conditions?.map((c: any) => `${c.field} ${c.operator} ${c.value}`).join(" AND ")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tab 3: Simulation Lab */}
+          {activeTab === "simulation" && (
+            <div className="bg-paper border border-ink-border rounded-lg p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-ink-border pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-ink">Simulation Lab — Scenario Curve</h3>
+                  <p className="text-xs text-ink-muted">
+                    Sweep factor analysis evaluated through pure Decimal engine
+                  </p>
                 </div>
+                <button
+                  onClick={handleRunSimulation}
+                  disabled={simLoading}
+                  className="px-3 py-1.5 rounded bg-cobalt text-paper text-xs font-semibold flex items-center gap-1.5"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${simLoading ? "animate-spin" : ""}`} />
+                  Re-run Sweep
+                </button>
+              </div>
 
-                <div className="bg-marigold-light/60 p-3 rounded-md border border-marigold/20 text-center">
-                  <span className="text-[10px] uppercase font-mono text-marigold block">Guardrails</span>
-                  <span className="text-xs font-mono text-ink font-medium mt-1 block">Active (Floor/Cap)</span>
+              {simPoints.length > 0 && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-7 gap-2">
+                    {simPoints.map((pt, i) => (
+                      <div key={i} className="p-3 bg-ledger border border-ink-border rounded text-center">
+                        <span className="text-[10px] font-mono text-ink-subtle block">Factor: {pt.sweep_value}</span>
+                        <span className="text-sm font-bold font-mono text-cobalt block mt-1">
+                          {currentUnit}{pt.final_price.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+            </div>
+          )}
 
-                <div className="bg-cobalt-light/60 p-3 rounded-md border border-cobalt/30 text-center">
-                  <span className="text-[10px] uppercase font-mono text-cobalt block">Final Evaluated</span>
-                  <span className="text-base font-bold font-mono text-cobalt tabular-nums">
-                    {activeDomain === "Banking" ? `${roundedPrice}%` : `$${roundedPrice}`}
-                  </span>
+          {/* Tab 4: Explain ("Why this price?") */}
+          {activeTab === "explain" && evalResult && (
+            <div className="bg-paper border border-ink-border rounded-lg p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-ink-border pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-ink">Audit Trace Deep Dive ("Why this price?")</h3>
+                  <p className="text-xs text-ink-muted">
+                    Complete verifiable execution path from initial base rate to final Decimal
+                  </p>
+                </div>
+                <span className="font-mono text-xs text-ink font-semibold">
+                  SHA-256: {evalResult.trace.decision_hash}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider font-mono text-ink-muted">
+                  Factor Contributions Breakdown
+                </h4>
+                <div className="space-y-2">
+                  {evalResult.contributions.map((c, i) => (
+                    <div key={i} className="p-3 bg-ledger border border-ink-border rounded flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-semibold text-ink">{c.rule_name || c.rule_id}</span>
+                        <p className="text-[11px] text-ink-muted">{c.reason}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-mono font-bold text-ink">{c.adjustment}</span>
+                        <span className="text-[10px] font-mono text-cobalt block">{c.contribution_pct}% contribution</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+          )}
+        </div>
+      </main>
 
-            {/* Why This Price Drawer */}
-            {showExplain && (
-              <div className="mt-4 p-4 bg-ledger border border-ink-border rounded-md space-y-3 animate-fadeIn">
+      {/* AI Copilot Side Drawer */}
+      {showCopilot && (
+        <div className="fixed inset-y-0 right-0 w-96 bg-paper border-l border-ink-border shadow-2xl z-50 flex flex-col justify-between p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-ink-border pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-marigold" />
+                <h3 className="text-sm font-bold text-ink">Monetize360 AI Copilot</h3>
+              </div>
+              <button onClick={() => setShowCopilot(false)} className="text-ink-muted hover:text-ink">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-ink-muted">
+              Enter a natural language pricing strategy. The copilot uses Google Gemini (or deterministic offline parser) to formulate a strict schema rule.
+            </p>
+
+            <div className="space-y-2">
+              <textarea
+                rows={3}
+                value={copilotPrompt}
+                onChange={(e) => setCopilotPrompt(e.target.value)}
+                placeholder="e.g., If occupancy rate exceeds 0.85, apply a 20% surge uplift"
+                className="w-full p-2.5 text-xs border border-ink-border rounded-md bg-ledger focus:outline-none focus:ring-1 focus:ring-cobalt font-sans"
+              />
+              <button
+                onClick={handleGenerateCopilotRule}
+                disabled={copilotLoading}
+                className="w-full py-2 bg-ink text-paper text-xs font-semibold rounded-md hover:bg-opacity-90 transition-all flex items-center justify-center gap-1.5"
+              >
+                {copilotLoading ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    Generating rule...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 text-marigold" />
+                    Formulate Rule
+                  </>
+                )}
+              </button>
+            </div>
+
+            {copilotProposal && (
+              <div className="p-3 bg-ledger border border-ink-border rounded-md space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Info className="w-4 h-4 text-cobalt" />
-                    <h4 className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
-                      Audit Trace Breakdown ("Why this price?")
-                    </h4>
-                  </div>
-                  <span className="text-[10px] font-mono text-ink-subtle">
-                    Decision Hash: 7a8f9c2d...3b1e
+                  <span className="font-bold text-ink">{copilotProposal.rule.name}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-lagoon-light text-lagoon">
+                    {copilotProposal.provider}
                   </span>
                 </div>
-
-                <div className="space-y-2 text-xs text-ink-muted">
-                  <div className="flex justify-between py-1 border-b border-ink-border/50">
-                    <span>1. Base Reference Definition</span>
-                    <span className="font-mono text-ink">${basePrice.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-ink-border/50">
-                    <span>2. Rule [SURGE_TIER_A]: Demand factor {demandMultiplier.toFixed(2)}x &gt; 1.20</span>
-                    <span className="font-mono text-lagoon">+{demandAdj.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-ink-border/50">
-                    <span>3. Rule [COMP_OFFSET]: Competitor differential applied</span>
-                    <span className="font-mono text-coral">{compAdj.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-ink-border/50">
-                    <span>4. Guardrail [FLOOR_CONSTRAINT]: Asserts price &gt;= minimum margin floor</span>
-                    <span className="font-mono text-marigold">PASS (within bounds)</span>
-                  </div>
-                  <div className="flex justify-between py-1 font-semibold text-ink">
-                    <span>5. Rounding Policy: Half-up 2 decimal places</span>
-                    <span className="font-mono text-cobalt">${roundedPrice}</span>
-                  </div>
+                <p className="text-[11px] text-ink-muted">{copilotProposal.explanation}</p>
+                <div className="font-mono text-[10px] bg-paper p-2 rounded border border-ink-border">
+                  Stage: {copilotProposal.rule.stage} | Action: {copilotProposal.rule.action.type} (
+                  {copilotProposal.rule.action.value})
                 </div>
+                <button
+                  onClick={handleApplyCopilotRule}
+                  className="w-full py-1.5 bg-cobalt text-paper font-semibold rounded text-xs hover:bg-opacity-90"
+                >
+                  Apply to Live Preview
+                </button>
               </div>
             )}
           </div>
 
-          {/* Quick Metrics & Health */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-paper border border-ink-border rounded-lg p-5 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-xs text-ink-subtle">
-                <span className="font-mono uppercase tracking-wider">Engine Latency</span>
-                <TrendingUp className="w-3.5 h-3.5 text-lagoon" />
-              </div>
-              <div className="text-2xl font-bold font-mono text-ink">1.82 ms</div>
-              <p className="text-[11px] text-ink-muted">P99 evaluation latency across test suite</p>
-            </div>
-
-            <div className="bg-paper border border-ink-border rounded-lg p-5 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-xs text-ink-subtle">
-                <span className="font-mono uppercase tracking-wider">Deterministic Hash Match</span>
-                <ShieldCheck className="w-3.5 h-3.5 text-lagoon" />
-              </div>
-              <div className="text-2xl font-bold font-mono text-ink">100.0%</div>
-              <p className="text-[11px] text-ink-muted">Reproducible replay on identical context</p>
-            </div>
-
-            <div className="bg-paper border border-ink-border rounded-lg p-5 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-xs text-ink-subtle">
-                <span className="font-mono uppercase tracking-wider">Active Domain Packs</span>
-                <Layers className="w-3.5 h-3.5 text-cobalt" />
-              </div>
-              <div className="text-2xl font-bold font-mono text-ink">6 Industries</div>
-              <p className="text-[11px] text-ink-muted">Hospitality, Travel, Banking, Retail, Rides, Cinema</p>
-            </div>
+          <div className="text-[10px] text-ink-subtle border-t border-ink-border pt-3">
+            Safety invariant: Copilot strictly proposes drafts. Approvals and validation remain authoritative.
           </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

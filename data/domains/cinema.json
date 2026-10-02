@@ -1,0 +1,62 @@
+{
+  "id": "cinema",
+  "name": "Cinema & Entertainment",
+  "description": "Theatrical tickets, blockbuster opening weekend surge, matinee discounts, and auditorium capacity tiers.",
+  "unit": "$",
+  "items": [
+    {
+      "id": "ticket_imax",
+      "name": "IMAX 70mm Reserved Ticket",
+      "base_price": "21.50",
+      "unit": "$",
+      "attributes": { "screen_format": "imax", "is_opening_weekend": true }
+    },
+    {
+      "id": "ticket_standard",
+      "name": "Standard Digital Cinema Ticket",
+      "base_price": "14.50",
+      "unit": "$",
+      "attributes": { "screen_format": "standard", "is_opening_weekend": false }
+    }
+  ],
+  "factors": [
+    { "name": "seats_sold_pct", "type": "number", "default": 0.88, "description": "Auditorium sellout percentage (0.0 to 1.0)" },
+    { "name": "is_matinee", "type": "boolean", "default": false, "description": "Whether showtime is prior to 4:00 PM" },
+    { "name": "popcorn_bundle", "type": "boolean", "default": false, "description": "Concession pre-purchase addon included" }
+  ],
+  "strategy": {
+    "domain_id": "cinema",
+    "version": "1.0.0",
+    "stages": ["demand", "time", "adjustments", "guardrails", "rounding"],
+    "rules": [
+      {
+        "id": "cinema_soldout_rush",
+        "name": "High Sellout Velocity",
+        "stage": "demand",
+        "description": "When auditorium is > 85% full, add $3.00 peak rush surcharge",
+        "conditions": [
+          { "field": "seats_sold_pct", "operator": ">=", "value": 0.85 }
+        ],
+        "action": { "type": "additive", "value": "3.00" },
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "cinema_matinee_deal",
+        "name": "Early Matinee Incentive",
+        "stage": "time",
+        "description": "Matinee showtimes receive 20% discount",
+        "conditions": [
+          { "field": "is_matinee", "operator": "==", "value": true }
+        ],
+        "action": { "type": "percentage", "value": "-20" },
+        "priority": 15,
+        "enabled": true
+      }
+    ],
+    "guardrails": [
+      { "id": "cinema_min_boxoffice", "name": "Distributor Minimum Guarantee", "type": "floor", "value": "8.50", "hard": true, "enabled": true }
+    ],
+    "rounding": { "method": "nearest_point_99", "decimals": 2 }
+  }
+}

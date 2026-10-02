@@ -1,0 +1,63 @@
+{
+  "id": "ecommerce",
+  "name": "E-Commerce",
+  "description": "Retail merchandise, stock velocity, competitor price match, and cart quantity incentives.",
+  "unit": "$",
+  "items": [
+    {
+      "id": "item_headphones",
+      "name": "Noise Cancelling Wireless Headphones",
+      "base_price": "149.99",
+      "unit": "$",
+      "attributes": { "category": "electronics", "stock_units": 45 }
+    },
+    {
+      "id": "item_smartwatch",
+      "name": "GPS Fitness Smartwatch",
+      "base_price": "249.99",
+      "unit": "$",
+      "attributes": { "category": "electronics", "stock_units": 8 }
+    }
+  ],
+  "factors": [
+    { "name": "stock_velocity", "type": "number", "default": 2.4, "description": "Units sold per hour" },
+    { "name": "competitor_min_price", "type": "number", "default": 139.99, "description": "Lowest scraped competitor market price" },
+    { "name": "cart_total", "type": "number", "default": 85.0, "description": "Total user cart value prior to item" }
+  ],
+  "strategy": {
+    "domain_id": "ecommerce",
+    "version": "1.0.0",
+    "stages": ["demand", "customer", "guardrails", "rounding"],
+    "rules": [
+      {
+        "id": "ecom_scarcity_uplift",
+        "name": "Low Stock Scarcity Premium",
+        "stage": "demand",
+        "description": "If stock units <= 10 and velocity >= 2.0, increase price by 8%",
+        "conditions": [
+          { "field": "stock_units", "operator": "<=", "value": 10 },
+          { "field": "stock_velocity", "operator": ">=", "value": 2.0 }
+        ],
+        "action": { "type": "percentage", "value": "8" },
+        "priority": 10,
+        "enabled": true
+      },
+      {
+        "id": "ecom_cart_bonus",
+        "name": "High Value Cart Incentive",
+        "stage": "customer",
+        "description": "If current cart exceeds $100, provide $10 discount",
+        "conditions": [
+          { "field": "cart_total", "operator": ">=", "value": 100.0 }
+        ],
+        "action": { "type": "additive", "value": "-10.00" },
+        "priority": 20,
+        "enabled": true
+      }
+    ],
+    "guardrails": [
+      { "id": "ecom_cogs_floor", "name": "COGS Margin Floor", "type": "floor", "value": "95.00", "hard": true, "enabled": true }
+    ],
+    "rounding": { "method": "nearest_point_99", "decimals": 2 }
+  }
+}
