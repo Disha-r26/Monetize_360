@@ -1,0 +1,116 @@
+# Environment & secrets (CRITICAL: never commit API keys)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+*.sqlite
+*.sqlite3
+*.db
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg-info/
+
+# Frontend / Node
+node_modules/
+.next/
+out/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# User Profile directory clutter (since workspace is user home directory)
+AppData/
+Contacts/
+Documents/
+Downloads/
+Favorites/
+Links/
+Music/
+Pictures/
+Saved Games/
+Searches/
+Videos/
+OneDrive/
+anaconda3/
+anaconda_projects/
+Python/
+.anaconda/
+.conda/
+.condarc
+.continuum/
+.copilot/
+.gemini/
+.arduinoIDE/
+.bob/
+.bobide/
+.bobide-shared/
+.ipynb_checkpoints/
+.ipython/
+.jupyter/
+.matplotlib/
+.ms-ad/
+.vscode/
+.vscode-shared/
+.local/
+.gitconfig
+
+# Windows junction points / user home shortcuts
+Application Data/
+Cookies/
+Local Settings/
+My Documents/
+NetHood/
+PrintHood/
+Recent/
+SendTo/
+Start Menu/
+Templates/
+
+NTUSER*
+ntuser*
+*.ipynb
+*.csv
+*.jpg
+*.jpeg
+*.png
+*.DAT*
+*.regtrans-ms
+*.blf
+*.LOG*
+*.ini
+Supermarket*
+football*
+railway*
+lungdata*
+insurance*
+E_Commerce*
+Section3*
+P&S*
+SUNRISE*
+sunset*
+Screenshot*
+image*
+mingit.zip
+install_git.ps1
+setup_env.ps1
+
+# OS files
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
