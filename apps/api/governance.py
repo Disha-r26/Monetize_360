@@ -10,20 +10,45 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
-GOVERNANCE_DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "governance"))
-os.makedirs(GOVERNANCE_DATA_DIR, exist_ok=True)
+import tempfile
+
+GOVERNANCE_DATA_DIR = os.environ.get(
+    "GOVERNANCE_DATA_DIR",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "governance"))
+)
+try:
+    os.makedirs(GOVERNANCE_DATA_DIR, exist_ok=True)
+    test_file = os.path.join(GOVERNANCE_DATA_DIR, ".write_test")
+    with open(test_file, "w", encoding="utf-8") as f:
+        f.write("ok")
+    os.remove(test_file)
+except OSError:
+    GOVERNANCE_DATA_DIR = os.path.join(tempfile.gettempdir(), "monetize_governance")
+    os.makedirs(GOVERNANCE_DATA_DIR, exist_ok=True)
 
 
 class AuditEntry(BaseModel):
     id: str
     timestamp: str
     author: str
-    action: str  # "PUBLISH", "ROLLBACK", "RULE_CREATE", "RULE_UPDATE", "RULE_DELETE", "SIMULATION"
+    action: str  # "PUBLISH", "ROLLBACK", "RULE_CREATE", "RULE_UPDATE", "RULE_DELETE", "user_login", "user_logout", etc.
     domain_id: str
     version: str
     details: Dict[str, Any] = Field(default_factory=dict)
     prev_hash: str
     entry_hash: str
+
+    # Extended unified audit fields (optional for full schema completeness & backward compatibility)
+    event_type: Optional[str] = None
+    category: Optional[str] = None
+    actor_user_id: Optional[str] = None
+    actor_name: Optional[str] = None
+    actor_email: Optional[str] = None
+    description: Optional[str] = None
+    created_at: Optional[str] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    device_info: Optional[str] = None
 
 
 class VersionRecord(BaseModel):
@@ -57,7 +82,13 @@ class GovernanceStore:
             data = json.load(f)
         entries = [AuditEntry(**d) for d in data]
         if domain_id:
-            entries = [e for e in entries if e.domain_id == domain_id]
+            entries = [
+                e for e in entries
+                if e.domain_id == domain_id
+                or e.domain_id == "global"
+                or e.category == "user_actions"
+                or e.action in ["user_login", "user_logout", "LOGIN", "USER_LOGIN", "LOGOUT"]
+            ]
         return entries
 
     def verify_audit_chain(self) -> Dict[str, Any]:
@@ -89,7 +120,16 @@ class GovernanceStore:
         action: str,
         domain_id: str,
         version: str,
-        details: Dict[str, Any]
+        details: Dict[str, Any],
+        event_type: Optional[str] = None,
+        category: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+        actor_name: Optional[str] = None,
+        actor_email: Optional[str] = None,
+        description: Optional[str] = None,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+        device_info: Optional[str] = None,
     ) -> AuditEntry:
         with open(self.audit_file, "r", encoding="utf-8") as f:
             raw_data = json.load(f)
@@ -101,16 +141,35 @@ class GovernanceStore:
         payload_to_hash = f"{prev_hash}:{now_iso}:{action}:{domain_id}:{version}"
         entry_hash = hashlib.sha256(payload_to_hash.encode("utf-8")).hexdigest()
 
+        eff_event_type = event_type or action
+        eff_category = category or (
+            "user_actions"
+            if action in ["user_login", "user_logout", "LOGIN", "LOGOUT", "RULE_CREATE", "RULE_UPDATE", "RULE_TOGGLE", "CONFIG_CHANGE"]
+            else "system"
+        )
+        eff_actor = actor_name or author
+        eff_email = actor_email or details.get("email") or details.get("actor_email")
+
         entry = AuditEntry(
             id=entry_id,
             timestamp=now_iso,
-            author=author,
+            author=eff_actor,
             action=action,
             domain_id=domain_id,
             version=version,
             details=details,
             prev_hash=prev_hash,
-            entry_hash=entry_hash
+            entry_hash=entry_hash,
+            event_type=eff_event_type,
+            category=eff_category,
+            actor_user_id=actor_user_id or details.get("user_id") or details.get("actor_user_id"),
+            actor_name=eff_actor,
+            actor_email=eff_email,
+            description=description or details.get("description"),
+            created_at=now_iso,
+            ip_address=ip_address or details.get("ip_address"),
+            user_agent=user_agent or details.get("user_agent"),
+            device_info=device_info or details.get("device_info"),
         )
 
         raw_data.append(entry.model_dump())

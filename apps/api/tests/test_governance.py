@@ -98,12 +98,29 @@ def test_item_and_rule_lifecycle():
         "id": item_id,
         "name": "Custom Penthouse",
         "base_price": "550.00",
-        "unit": "$"
+        "unit": "$",
+        "author": "Disha R"
     })
     assert add_it.status_code == 200
 
+    # Edit item
+    edit_it = client.put(f"/api/domains/{domain_id}/items/{item_id}", json={
+        "name": "Luxury Penthouse Suite",
+        "base_price": "595.00",
+        "author": "Disha R"
+    })
+    assert edit_it.status_code == 200
+    assert edit_it.json()["item"]["base_price"] == "595.00"
+    assert edit_it.json()["item"]["name"] == "Luxury Penthouse Suite"
+
+    # Verify audit trail contains ITEM_UPDATE with author
+    trail_res = client.get(f"/api/governance/audit-trail?domain_id={domain_id}")
+    assert trail_res.status_code == 200
+    trail = trail_res.json()["audit_trail"]
+    assert any(e["action"] == "ITEM_UPDATE" and e["author"] == "Disha R" for e in trail)
+
     # Delete item
-    del_it = client.delete(f"/api/domains/{domain_id}/items/{item_id}")
+    del_it = client.delete(f"/api/domains/{domain_id}/items/{item_id}?author=Disha%20R")
     assert del_it.status_code == 200
 
 

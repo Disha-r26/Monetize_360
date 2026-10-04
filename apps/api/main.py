@@ -9,7 +9,7 @@ import json
 import random
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -109,6 +109,28 @@ class CreateItemRequest(BaseModel):
     base_price: str
     unit: str = "$"
     attributes: Dict[str, Any] = Field(default_factory=dict)
+    author: Optional[str] = "Pricing Manager"
+
+
+class UpdateItemRequest(BaseModel):
+    name: Optional[str] = None
+    base_price: Optional[str] = None
+    attributes: Optional[Dict[str, Any]] = None
+    author: Optional[str] = "Pricing Manager"
+
+
+class GenericAuditRequest(BaseModel):
+    author: Optional[str] = None
+    action: Optional[str] = None
+    event_type: Optional[str] = None
+    category: Optional[str] = "user_actions"
+    actor: Optional[str] = None
+    actor_name: Optional[str] = None
+    actor_email: Optional[str] = None
+    actor_user_id: Optional[str] = None
+    description: Optional[str] = None
+    domain_id: str = "hospitality"
+    details: Dict[str, Any] = Field(default_factory=dict)
 
 
 # --- Root & Health ---
@@ -168,35 +190,100 @@ def add_item(domain_id: str, req: CreateItemRequest):
     if any(it["id"] == req.id for it in data["items"]):
         raise HTTPException(status_code=400, detail=f"Item with ID '{req.id}' already exists")
     
-    new_item = req.model_dump()
+    # Format base_price cleanly to 2 decimal places
+    try:
+        dec_price = f"{Decimal(req.base_price):.2f}"
+    except Exception:
+        dec_price = req.base_price
+
+    new_item = {
+        "id": req.id,
+        "name": req.name.strip(),
+        "base_price": dec_price,
+        "unit": req.unit,
+        "attributes": req.attributes
+    }
     data["items"].append(new_item)
     save_domain_pack(domain_id, data)
 
+    author = req.author or "Pricing Manager"
     governance_store.add_audit_entry(
-        author="Pricing Manager",
+        author=author,
         action="ITEM_CREATE",
         domain_id=domain_id,
         version=data.get("strategy", {}).get("version", "1.0.0"),
-        details={"item_id": req.id, "name": req.name, "base_price": req.base_price}
+        details={"item_id": req.id, "name": req.name.strip(), "base_price": dec_price}
     )
     return {"status": "created", "item": new_item}
 
 
-@app.delete("/api/domains/{domain_id}/items/{item_id}")
-def delete_item(domain_id: str, item_id: str):
+@app.put("/api/domains/{domain_id}/items/{item_id}")
+def update_item(domain_id: str, item_id: str, req: UpdateItemRequest):
     data = load_domain_pack(domain_id)
-    orig_count = len(data["items"])
-    data["items"] = [it for it in data["items"] if it["id"] != item_id]
-    if len(data["items"]) == orig_count:
+    target = next((it for it in data.get("items", []) if it["id"] == item_id), None)
+    if not target:
         raise HTTPException(status_code=404, detail=f"Item '{item_id}' not found")
+
+    old_name = target.get("name", "")
+    old_base_price = target.get("base_price", "0.00")
+
+    if req.name is not None and req.name.strip():
+        target["name"] = req.name.strip()
+    if req.base_price is not None and req.base_price.strip():
+        try:
+            d_val = Decimal(req.base_price)
+            target["base_price"] = f"{d_val:.2f}"
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid base_price format")
+    if req.attributes is not None:
+        target["attributes"] = req.attributes
+
     save_domain_pack(domain_id, data)
+
+    author = req.author or "Pricing Manager"
+    governance_store.add_audit_entry(
+        author=author,
+        action="ITEM_UPDATE",
+        domain_id=domain_id,
+        version=data.get("strategy", {}).get("version", "1.0.0"),
+        details={
+            "item_id": item_id,
+            "name": target["name"],
+            "previous_name": old_name,
+            "previous_base_price": old_base_price,
+            "new_base_price": target["base_price"]
+        }
+    )
+    return {"status": "updated", "item": target}
+
+
+@app.delete("/api/domains/{domain_id}/items/{item_id}")
+def delete_item(domain_id: str, item_id: str, author: Optional[str] = "Pricing Manager"):
+    data = load_domain_pack(domain_id)
+    target = next((it for it in data.get("items", []) if it["id"] == item_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail=f"Item '{item_id}' not found")
+    data["items"] = [it for it in data["items"] if it["id"] != item_id]
+    save_domain_pack(domain_id, data)
+
+    governance_store.add_audit_entry(
+        author=author or "Pricing Manager",
+        action="ITEM_DELETE",
+        domain_id=domain_id,
+        version=data.get("strategy", {}).get("version", "1.0.0"),
+        details={
+            "item_id": item_id,
+            "name": target.get("name", item_id),
+            "base_price": target.get("base_price", "0.00")
+        }
+    )
     return {"status": "deleted", "item_id": item_id}
 
 
 # --- Rules Management ---
 
 @app.post("/api/domains/{domain_id}/rules")
-def add_rule(domain_id: str, rule: Rule):
+def add_rule(domain_id: str, rule: Rule, author: Optional[str] = "Pricing Manager"):
     data = load_domain_pack(domain_id)
     if "rules" not in data["strategy"]:
         data["strategy"]["rules"] = []
@@ -207,7 +294,7 @@ def add_rule(domain_id: str, rule: Rule):
     save_domain_pack(domain_id, data)
 
     governance_store.add_audit_entry(
-        author="Pricing Manager",
+        author=author or "Pricing Manager",
         action="RULE_CREATE",
         domain_id=domain_id,
         version=data["strategy"].get("version", "1.0.0"),
@@ -217,14 +304,14 @@ def add_rule(domain_id: str, rule: Rule):
 
 
 @app.delete("/api/domains/{domain_id}/rules/{rule_id}")
-def delete_rule(domain_id: str, rule_id: str):
+def delete_rule(domain_id: str, rule_id: str, author: Optional[str] = "Pricing Manager"):
     data = load_domain_pack(domain_id)
     rules = data.get("strategy", {}).get("rules", [])
     data["strategy"]["rules"] = [r for r in rules if r["id"] != rule_id]
     save_domain_pack(domain_id, data)
 
     governance_store.add_audit_entry(
-        author="Pricing Manager",
+        author=author or "Pricing Manager",
         action="RULE_DELETE",
         domain_id=domain_id,
         version=data["strategy"].get("version", "1.0.0"),
@@ -234,7 +321,7 @@ def delete_rule(domain_id: str, rule_id: str):
 
 
 @app.patch("/api/domains/{domain_id}/rules/{rule_id}/toggle")
-def toggle_rule(domain_id: str, rule_id: str):
+def toggle_rule(domain_id: str, rule_id: str, author: Optional[str] = "Pricing Manager"):
     data = load_domain_pack(domain_id)
     rules = data.get("strategy", {}).get("rules", [])
     matched = False
@@ -246,6 +333,14 @@ def toggle_rule(domain_id: str, rule_id: str):
     if not matched:
         raise HTTPException(status_code=404, detail=f"Rule '{rule_id}' not found")
     save_domain_pack(domain_id, data)
+
+    governance_store.add_audit_entry(
+        author=author or "Pricing Manager",
+        action="RULE_TOGGLE",
+        domain_id=domain_id,
+        version=data["strategy"].get("version", "1.0.0"),
+        details={"rule_id": rule_id, "enabled": r["enabled"]}
+    )
     return {"status": "toggled", "rule_id": rule_id}
 
 
@@ -524,3 +619,71 @@ def get_audit_trail(domain_id: Optional[str] = None):
 @app.get("/api/governance/verify-audit")
 def verify_audit():
     return governance_store.verify_audit_chain()
+
+
+@app.post("/api/governance/audit-event")
+def create_audit_event(req: GenericAuditRequest, request: Request):
+    data = load_domain_pack(req.domain_id)
+    version = data.get("strategy", {}).get("version", "1.0.0")
+
+    action = req.event_type or req.action or "user_actions"
+    event_type = req.event_type or action
+    actor_name = (
+        req.actor_name
+        or req.actor
+        or req.author
+        or req.details.get("actor")
+        or req.details.get("actor_name")
+        or (req.actor_email.split("@")[0] if req.actor_email else "User")
+    )
+    actor_email = req.actor_email or req.details.get("actor_email") or req.details.get("email")
+    actor_user_id = req.actor_user_id or req.details.get("actor_user_id") or req.details.get("user_id")
+
+    description = req.description or req.details.get("description")
+    if not description:
+        if action in ["user_login", "LOGIN", "USER_LOGIN"]:
+            description = f"{actor_name} signed in via email authentication"
+        elif action in ["user_logout", "LOGOUT"]:
+            description = f"{actor_name} terminated session"
+
+    # Extract client IP and user agent if genuine
+    client_ip = None
+    if request.headers.get("x-forwarded-for"):
+        client_ip = request.headers.get("x-forwarded-for").split(",")[0].strip()
+    elif request.client and request.client.host:
+        client_ip = request.client.host
+
+    user_agent = request.headers.get("user-agent")
+
+    merged_details = dict(req.details)
+    merged_details.update({
+        "event_type": event_type,
+        "display_title": "User Logged In" if action in ["user_login", "LOGIN", "USER_LOGIN"] else ("User Logged Out" if action in ["user_logout", "LOGOUT"] else req.details.get("display_title")),
+        "category": req.category or "user_actions",
+        "actor": actor_name,
+        "actor_name": actor_name,
+        "actor_email": actor_email,
+        "actor_user_id": actor_user_id,
+        "description": description,
+    })
+    if client_ip:
+        merged_details["ip_address"] = client_ip
+    if user_agent:
+        merged_details["user_agent"] = user_agent
+
+    entry = governance_store.add_audit_entry(
+        author=actor_name,
+        action=action,
+        domain_id=req.domain_id,
+        version=version,
+        details=merged_details,
+        event_type=event_type,
+        category=req.category or "user_actions",
+        actor_user_id=actor_user_id,
+        actor_name=actor_name,
+        actor_email=actor_email,
+        description=description,
+        ip_address=client_ip,
+        user_agent=user_agent,
+    )
+    return {"status": "recorded", "entry": entry.model_dump()}

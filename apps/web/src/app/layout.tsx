@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   description: "Enterprise domain-agnostic pricing operations platform with deterministic waterfall trace.",
 };
 
+import { AuthProvider } from "../context/AuthContext";
+
 export default function RootLayout({
   children,
 }: {
@@ -29,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
       <body className="min-h-screen bg-ledger text-ink antialiased">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

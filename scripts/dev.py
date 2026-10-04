@@ -60,6 +60,16 @@ def main():
     # Wait 1.5 seconds for backend to initialize
     time.sleep(1.5)
 
+    # Clean production build residue if present to prevent dev chunk 404 desynchronization
+    next_dir = os.path.join(WEB_DIR, ".next")
+    build_id_file = os.path.join(next_dir, "BUILD_ID")
+    if os.path.exists(build_id_file):
+        try:
+            import shutil
+            shutil.rmtree(next_dir, ignore_errors=True)
+        except Exception:
+            pass
+
     # 2. Start Next.js Frontend on port 3000
     print("[Frontend] Starting Next.js App Router on port 3000...")
     npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"

@@ -402,7 +402,7 @@
     {
       "version": "1.3.0",
       "domain_id": "hospitality",
-      "status": "published",
+      "status": "archived",
       "created_at": "2026-10-02T19:16:29.005850+00:00",
       "published_at": "2026-10-02T19:16:29.005850+00:00",
       "author": "Test Officer",
@@ -528,6 +528,5706 @@
         ],
         "rounding": {
           "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.4.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T13:39:46.327414+00:00",
+      "published_at": "2026-10-03T13:39:46.327414+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.4.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.4.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T13:46:16.164395+00:00",
+      "published_at": "2026-10-03T13:46:16.164395+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.4.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.5.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T13:56:51.348931+00:00",
+      "published_at": "2026-10-03T13:56:51.348931+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.5.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.5.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:07:09.161886+00:00",
+      "published_at": "2026-10-03T14:07:09.161886+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.5.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.6.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:07:53.764000+00:00",
+      "published_at": "2026-10-03T14:07:53.764000+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.6.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.6.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:08:23.434093+00:00",
+      "published_at": "2026-10-03T14:08:23.434093+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.6.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.7.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:13:09.547900+00:00",
+      "published_at": "2026-10-03T14:13:09.547900+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.7.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.7.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:15:02.553138+00:00",
+      "published_at": "2026-10-03T14:15:02.553138+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.7.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.8.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:36:58.485941+00:00",
+      "published_at": "2026-10-03T14:36:58.485941+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.8.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.8.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:37:27.707021+00:00",
+      "published_at": "2026-10-03T14:37:27.707021+00:00",
+      "author": "Test Officer",
+      "rules_count": 4,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.8.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.9.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:38:57.980304+00:00",
+      "published_at": "2026-10-03T14:38:57.980304+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.9.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.9.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:56:59.284120+00:00",
+      "published_at": "2026-10-03T14:56:59.284120+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.9.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.10.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T14:58:58.539226+00:00",
+      "published_at": "2026-10-03T14:58:58.539226+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.10.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.10.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T15:12:28.504585+00:00",
+      "published_at": "2026-10-03T15:12:28.504585+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.10.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.11.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T15:25:23.485920+00:00",
+      "published_at": "2026-10-03T15:25:23.485920+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.11.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.11.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-03T15:33:09.312569+00:00",
+      "published_at": "2026-10-03T15:33:09.312569+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.11.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.12.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T05:49:42.828215+00:00",
+      "published_at": "2026-10-04T05:49:42.828215+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.12.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.12.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T06:16:00.930321+00:00",
+      "published_at": "2026-10-04T06:16:00.930321+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.12.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.13.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T06:16:11.910148+00:00",
+      "published_at": "2026-10-04T06:16:11.910148+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.13.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.13.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T06:36:44.453387+00:00",
+      "published_at": "2026-10-04T06:36:44.453387+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.13.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.14.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T07:05:44.562891+00:00",
+      "published_at": "2026-10-04T07:05:44.562891+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.14.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.14.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T07:35:06.403845+00:00",
+      "published_at": "2026-10-04T07:35:06.403845+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.14.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.15.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T08:11:17.240447+00:00",
+      "published_at": "2026-10-04T08:11:17.240447+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.15.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.15.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T08:25:30.115965+00:00",
+      "published_at": "2026-10-04T08:25:30.115965+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.15.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.16.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T08:45:04.771236+00:00",
+      "published_at": "2026-10-04T08:45:04.771236+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.16.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.16.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T10:37:35.184713+00:00",
+      "published_at": "2026-10-04T10:37:35.184713+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.16.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.17.0",
+      "domain_id": "hospitality",
+      "status": "archived",
+      "created_at": "2026-10-04T11:11:16.830338+00:00",
+      "published_at": "2026-10-04T11:11:16.830338+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.17.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "version": "1.17.0",
+      "domain_id": "hospitality",
+      "status": "published",
+      "created_at": "2026-10-04T11:39:35.106845+00:00",
+      "published_at": "2026-10-04T11:39:35.106845+00:00",
+      "author": "Test Officer",
+      "rules_count": 8,
+      "strategy_snapshot": {
+        "domain_id": "hospitality",
+        "version": "1.17.0",
+        "stages": [
+          "demand",
+          "customer",
+          "time",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "hosp_high_occupancy",
+            "name": "High Occupancy Surge",
+            "stage": "demand",
+            "description": "When occupancy exceeds 80%, increase price by 25%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "hosp_moderate_occupancy",
+            "name": "Moderate Occupancy Uplift",
+            "stage": "demand",
+            "description": "When occupancy is between 65% and 80%, increase price by 10%",
+            "conditions": [
+              {
+                "field": "occupancy_rate",
+                "operator": ">=",
+                "value": 0.65
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.8
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_high",
+            "name": "High Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price exceeds $250, increase price by 10%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": ">",
+                "value": 250
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "10"
+            },
+            "priority": 18,
+            "enabled": true
+          },
+          {
+            "id": "hosp_comp_low",
+            "name": "Low Competitor Price",
+            "stage": "demand",
+            "description": "When competitor price is below $150, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "competitor_price",
+                "operator": "<",
+                "value": 150
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 19,
+            "enabled": true
+          },
+          {
+            "id": "hosp_gold_loyalty",
+            "name": "Gold Member Privilege",
+            "stage": "customer",
+            "description": "Gold and Platinum loyalty members receive a $15 discount",
+            "conditions": [
+              {
+                "field": "loyalty_tier",
+                "operator": "in",
+                "value": [
+                  "gold",
+                  "platinum"
+                ]
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-15.00"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "hosp_last_minute",
+            "name": "Last Minute Booking Discount",
+            "stage": "time",
+            "description": "If booking within 2 days and occupancy < 60%, discount by 12%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": "<=",
+                "value": 2
+              },
+              {
+                "field": "occupancy_rate",
+                "operator": "<",
+                "value": 0.6
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-12"
+            },
+            "priority": 30,
+            "enabled": true
+          },
+          {
+            "id": "hosp_advance_booking",
+            "name": "Advance Booking Discount",
+            "stage": "time",
+            "description": "When booking 21 or more days in advance, decrease price by 5%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-5"
+            },
+            "priority": 35,
+            "enabled": true
+          },
+          {
+            "id": "hosp_early_booking",
+            "name": "Early Booking Discount",
+            "stage": "time",
+            "description": "When booking 14 to 20 days in advance, decrease price by 3%",
+            "conditions": [
+              {
+                "field": "lead_days",
+                "operator": ">=",
+                "value": 14
+              },
+              {
+                "field": "lead_days",
+                "operator": "<",
+                "value": 21
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-3"
+            },
+            "priority": 36,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "hosp_floor",
+            "name": "Housekeeping Cost Floor",
+            "type": "floor",
+            "value": "90.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "hosp_ceiling",
+            "name": "Maximum ADR Ceiling",
+            "type": "ceiling",
+            "value": "450.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    }
+  ],
+  "ridehailing": [
+    {
+      "version": "1.0.0",
+      "domain_id": "ridehailing",
+      "status": "published",
+      "created_at": "2026-10-04T08:21:56.376612+00:00",
+      "published_at": "2026-10-04T08:21:56.376612+00:00",
+      "author": "System Initialization",
+      "rules_count": 3,
+      "strategy_snapshot": {
+        "domain_id": "ridehailing",
+        "version": "1.0.0",
+        "stages": [
+          "demand",
+          "time",
+          "adjustments",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "ride_dynamic_surge",
+            "name": "Dynamic Imbalance Surge",
+            "stage": "demand",
+            "description": "Multiply fare by surge ratio when surge > 1.10",
+            "conditions": [
+              {
+                "field": "surge_ratio",
+                "operator": ">",
+                "value": 1.1
+              }
+            ],
+            "action": {
+              "type": "formula",
+              "value": "current_price * surge_ratio"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "ride_adverse_weather",
+            "name": "Severe Weather Supply Incentive",
+            "stage": "adjustments",
+            "description": "When weather severity >= 1.0, add $3.50 driver hazard stipend",
+            "conditions": [
+              {
+                "field": "weather_severity",
+                "operator": ">=",
+                "value": 1.0
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "3.50"
+            },
+            "priority": 20,
+            "enabled": true
+          },
+          {
+            "id": "ride_airport_toll",
+            "name": "Airport Facility Surcharge",
+            "stage": "adjustments",
+            "description": "Airport pickup or dropoff includes fixed $5.00 surcharge",
+            "conditions": [
+              {
+                "field": "airport_zone",
+                "operator": "==",
+                "value": true
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "5.00"
+            },
+            "priority": 25,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "ride_min_fare",
+            "name": "Minimum Base Fare Floor",
+            "type": "floor",
+            "value": "8.00",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "ride_surge_cap",
+            "name": "Anti-Gouging Surge Ceiling",
+            "type": "ceiling",
+            "value": "85.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "nearest_0_05",
+          "decimals": 2
+        }
+      }
+    }
+  ],
+  "banking": [
+    {
+      "version": "1.0.0",
+      "domain_id": "banking",
+      "status": "published",
+      "created_at": "2026-10-04T08:22:00.323494+00:00",
+      "published_at": "2026-10-04T08:22:00.323494+00:00",
+      "author": "System Initialization",
+      "rules_count": 3,
+      "strategy_snapshot": {
+        "domain_id": "banking",
+        "version": "1.0.0",
+        "stages": [
+          "customer",
+          "adjustments",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "bank_subprime_risk",
+            "name": "Subprime Risk Premium",
+            "stage": "customer",
+            "description": "Subprime applicants require +4.25% risk offset spread",
+            "conditions": [
+              {
+                "field": "credit_tier",
+                "operator": "==",
+                "value": "subprime"
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "4.25"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "bank_super_prime_discount",
+            "name": "Super Prime Preferred Rate",
+            "stage": "customer",
+            "description": "Super prime tier receives 0.75% rate discount",
+            "conditions": [
+              {
+                "field": "credit_tier",
+                "operator": "==",
+                "value": "super_prime"
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-0.75"
+            },
+            "priority": 15,
+            "enabled": true
+          },
+          {
+            "id": "bank_high_ltv",
+            "name": "High LTV Collateral Spread",
+            "stage": "adjustments",
+            "description": "If LTV ratio exceeds 90%, add 0.50% risk margin",
+            "conditions": [
+              {
+                "field": "ltv_ratio",
+                "operator": ">=",
+                "value": 0.9
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "0.50"
+            },
+            "priority": 25,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "bank_usury_ceiling",
+            "name": "Regulatory Rate Cap",
+            "type": "ceiling",
+            "value": "24.99",
+            "hard": true,
+            "enabled": true
+          },
+          {
+            "id": "bank_cost_of_funds_floor",
+            "name": "Cost of Funds Floor",
+            "type": "floor",
+            "value": "3.50",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "half_up",
+          "decimals": 2
+        }
+      }
+    }
+  ],
+  "travel": [
+    {
+      "version": "1.0.0",
+      "domain_id": "travel",
+      "status": "published",
+      "created_at": "2026-10-04T08:22:09.354629+00:00",
+      "published_at": "2026-10-04T08:22:09.354629+00:00",
+      "author": "System Initialization",
+      "rules_count": 2,
+      "strategy_snapshot": {
+        "domain_id": "travel",
+        "version": "1.0.0",
+        "stages": [
+          "demand",
+          "time",
+          "adjustments",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "travel_tight_capacity",
+            "name": "High Load Factor Surge",
+            "stage": "demand",
+            "description": "If cabin load exceeds 85%, add 30% yield uplift",
+            "conditions": [
+              {
+                "field": "load_factor",
+                "operator": ">=",
+                "value": 0.85
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "30"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "travel_departure_proximity",
+            "name": "Departure Proximity Premium",
+            "stage": "time",
+            "description": "If departure is within 3 days, add $45 express booking fee",
+            "conditions": [
+              {
+                "field": "days_to_departure",
+                "operator": "<=",
+                "value": 3
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "45.00"
+            },
+            "priority": 20,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "travel_min_margin",
+            "name": "Direct Operating Cost Floor",
+            "type": "floor",
+            "value": "110.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "nearest_point_99",
+          "decimals": 2
+        }
+      }
+    }
+  ],
+  "cinema": [
+    {
+      "version": "1.0.0",
+      "domain_id": "cinema",
+      "status": "published",
+      "created_at": "2026-10-04T08:22:19.953899+00:00",
+      "published_at": "2026-10-04T08:22:19.953899+00:00",
+      "author": "System Initialization",
+      "rules_count": 2,
+      "strategy_snapshot": {
+        "domain_id": "cinema",
+        "version": "1.0.0",
+        "stages": [
+          "demand",
+          "time",
+          "adjustments",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "cinema_soldout_rush",
+            "name": "High Sellout Velocity",
+            "stage": "demand",
+            "description": "When auditorium is > 85% full, add $3.00 peak rush surcharge",
+            "conditions": [
+              {
+                "field": "seats_sold_pct",
+                "operator": ">=",
+                "value": 0.85
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "3.00"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "cinema_matinee_deal",
+            "name": "Early Matinee Incentive",
+            "stage": "time",
+            "description": "Matinee showtimes receive 20% discount",
+            "conditions": [
+              {
+                "field": "is_matinee",
+                "operator": "==",
+                "value": true
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "-20"
+            },
+            "priority": 15,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "cinema_min_boxoffice",
+            "name": "Distributor Minimum Guarantee",
+            "type": "floor",
+            "value": "8.50",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "nearest_point_99",
+          "decimals": 2
+        }
+      }
+    }
+  ],
+  "ecommerce": [
+    {
+      "version": "1.0.0",
+      "domain_id": "ecommerce",
+      "status": "published",
+      "created_at": "2026-10-04T08:22:30.249223+00:00",
+      "published_at": "2026-10-04T08:22:30.249223+00:00",
+      "author": "System Initialization",
+      "rules_count": 2,
+      "strategy_snapshot": {
+        "domain_id": "ecommerce",
+        "version": "1.0.0",
+        "stages": [
+          "demand",
+          "customer",
+          "guardrails",
+          "rounding"
+        ],
+        "rules": [
+          {
+            "id": "ecom_scarcity_uplift",
+            "name": "Low Stock Scarcity Premium",
+            "stage": "demand",
+            "description": "If stock units <= 10 and velocity >= 2.0, increase price by 8%",
+            "conditions": [
+              {
+                "field": "stock_units",
+                "operator": "<=",
+                "value": 10
+              },
+              {
+                "field": "stock_velocity",
+                "operator": ">=",
+                "value": 2.0
+              }
+            ],
+            "action": {
+              "type": "percentage",
+              "value": "8"
+            },
+            "priority": 10,
+            "enabled": true
+          },
+          {
+            "id": "ecom_cart_bonus",
+            "name": "High Value Cart Incentive",
+            "stage": "customer",
+            "description": "If current cart exceeds $100, provide $10 discount",
+            "conditions": [
+              {
+                "field": "cart_total",
+                "operator": ">=",
+                "value": 100.0
+              }
+            ],
+            "action": {
+              "type": "additive",
+              "value": "-10.00"
+            },
+            "priority": 20,
+            "enabled": true
+          }
+        ],
+        "guardrails": [
+          {
+            "id": "ecom_cogs_floor",
+            "name": "COGS Margin Floor",
+            "type": "floor",
+            "value": "95.00",
+            "hard": true,
+            "enabled": true
+          }
+        ],
+        "rounding": {
+          "method": "nearest_point_99",
           "decimals": 2
         }
       }

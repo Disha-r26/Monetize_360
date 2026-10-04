@@ -8,7 +8,7 @@ Zero domain branches.
 import hashlib
 import json
 from decimal import Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from engine.models import (
     ActionType,
     ComparisonOperator,
@@ -177,45 +177,90 @@ class PricingEngine:
         if not conditions:
             return True
 
+        def _to_decimal(val: Any) -> Optional[Decimal]:
+            if isinstance(val, bool) or val is None:
+                return None
+            if isinstance(val, (int, float, Decimal)):
+                return Decimal(str(val))
+            if isinstance(val, str):
+                try:
+                    return Decimal(val.strip())
+                except Exception:
+                    return None
+            return None
+
         for cond in conditions:
             field_val = ctx.get(cond.field)
             if field_val is None:
                 return False
 
             target_val = cond.value
-            # Convert numeric types (excluding bool) to Decimal for exact comparison
-            if isinstance(field_val, bool) or isinstance(target_val, bool):
-                pass
-            elif isinstance(field_val, (int, float)):
-                field_val = Decimal(str(field_val))
-            elif isinstance(target_val, (int, float)):
-                target_val = Decimal(str(target_val))
-
             op = cond.operator
-            if op == ComparisonOperator.EQUALS:
-                if field_val != target_val:
-                    return False
-            elif op == ComparisonOperator.NOT_EQUALS:
-                if field_val == target_val:
-                    return False
-            elif op == ComparisonOperator.GREATER_THAN:
-                if not (field_val > target_val):
-                    return False
-            elif op == ComparisonOperator.GREATER_THAN_OR_EQUAL:
-                if not (field_val >= target_val):
-                    return False
-            elif op == ComparisonOperator.LESS_THAN:
-                if not (field_val < target_val):
-                    return False
-            elif op == ComparisonOperator.LESS_THAN_OR_EQUAL:
-                if not (field_val <= target_val):
-                    return False
-            elif op == ComparisonOperator.IN:
-                if field_val not in target_val:
-                    return False
-            elif op == ComparisonOperator.NOT_IN:
-                if field_val in target_val:
-                    return False
+
+            # Check if both can be compared as Decimal numbers
+            d_field = _to_decimal(field_val)
+            d_target = _to_decimal(target_val)
+
+            if d_field is not None and d_target is not None:
+                comp_field = d_field
+                comp_target = d_target
+            else:
+                comp_field = field_val
+                comp_target = target_val
+
+            try:
+                if op == ComparisonOperator.EQUALS:
+                    if isinstance(comp_field, str) and isinstance(comp_target, str):
+                        if comp_field.strip().lower() != comp_target.strip().lower():
+                            return False
+                    elif comp_field != comp_target:
+                        return False
+                elif op == ComparisonOperator.NOT_EQUALS:
+                    if isinstance(comp_field, str) and isinstance(comp_target, str):
+                        if comp_field.strip().lower() == comp_target.strip().lower():
+                            return False
+                    elif comp_field == comp_target:
+                        return False
+                elif op == ComparisonOperator.GREATER_THAN:
+                    if not (comp_field > comp_target):
+                        return False
+                elif op == ComparisonOperator.GREATER_THAN_OR_EQUAL:
+                    if not (comp_field >= comp_target):
+                        return False
+                elif op == ComparisonOperator.LESS_THAN:
+                    if not (comp_field < comp_target):
+                        return False
+                elif op == ComparisonOperator.LESS_THAN_OR_EQUAL:
+                    if not (comp_field <= comp_target):
+                        return False
+                elif op == ComparisonOperator.IN:
+                    if not isinstance(comp_target, (list, tuple, set)):
+                        return False
+                    if d_field is not None:
+                        matched = any(_to_decimal(t) == d_field for t in comp_target if _to_decimal(t) is not None)
+                        if not matched:
+                            return False
+                    elif isinstance(comp_field, str):
+                        targets = [str(t).strip().lower() for t in comp_target]
+                        if comp_field.strip().lower() not in targets:
+                            return False
+                    elif comp_field not in comp_target:
+                        return False
+                elif op == ComparisonOperator.NOT_IN:
+                    if not isinstance(comp_target, (list, tuple, set)):
+                        return False
+                    if d_field is not None:
+                        matched = any(_to_decimal(t) == d_field for t in comp_target if _to_decimal(t) is not None)
+                        if matched:
+                            return False
+                    elif isinstance(comp_field, str):
+                        targets = [str(t).strip().lower() for t in comp_target]
+                        if comp_field.strip().lower() in targets:
+                            return False
+                    elif comp_field in comp_target:
+                        return False
+            except TypeError:
+                return False
 
         return True
 

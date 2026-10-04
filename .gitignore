@@ -6,6 +6,7 @@
 
 # Python
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 .pytest_cache/
@@ -34,6 +35,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# Scratch & debug artifacts
+scratch/
 
 # User Profile directory clutter (since workspace is user home directory)
 AppData/
