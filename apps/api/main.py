@@ -27,6 +27,7 @@ from engine.trace import compute_factor_contributions, run_counterfactual
 from engine.linter import StrategyLinter, LintIssue
 from apps.api.copilot.provider import get_copilot_provider, CopilotRuleProposal
 from apps.api.governance import governance_store, AuditEntry, VersionRecord
+from apps.api.ratelimit import RateLimitMiddleware
 
 DOMAINS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "domains"))
 
@@ -36,6 +37,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CORS Middleware (Outer layer so 429 responses include CORS headers)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,6 +45,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Production API Rate Limiting Middleware
+app.add_middleware(RateLimitMiddleware)
 
 engine = PricingEngine()
 linter = StrategyLinter()
