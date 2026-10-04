@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Production-grade API Rate Limiting Middleware for Monetize360 (Next.js / Vercel Edge).
+ * Production-grade API Rate Limiting Middleware for Monetize360.
  *
  * Guarantees:
  * - Matcher strictly targets '/api/:path*' ONLY.
- * - NEVER intercepts Next.js static assets ('/_next/*').
- * - NEVER intercepts favicon, robots.txt, or public static files.
- * - NEVER intercepts main page routes ('/', '/login', '/signup').
- * - Enforces sliding-window rate limit tiers per endpoint category:
+ * - Explicit early return guard guarantees rate limiting NEVER runs on:
+ *     * Root page ('/')
+ *     * Next.js internal static assets ('/_next/*')
+ *     * Page routes ('/login', '/signup', etc.)
+ *     * Static assets, images, favicon, CSS, JS chunks (files with extensions)
+ * - Rate limiting applies ONLY to intended /api/* endpoints:
  *     * Copilot AI operations: 10 requests / min
  *     * Dynamic Pricing calculations & simulations: 60 requests / min
  *     * Governance audit event logging: 30 requests / min
@@ -18,6 +20,8 @@ import { NextRequest, NextResponse } from "next/server";
  *     * Exempt: /api/health
  * - Complies with standard HTTP headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After).
  * - Emits HTTP 429 Too Many Requests when limits are exceeded.
+ * - 100% Edge-runtime compatible: zero Node-only package dependencies.
+ * - Never returns 404 or rewrites/redirects for page routes.
  */
 
 interface RateLimitRule {
@@ -164,15 +168,15 @@ function checkRateLimit(
   if (timestamps.length >= maxRequests) {
     const oldest = timestamps[0] || cutoff;
     const retryAfter = Math.max(1, Math.ceil((oldest + windowSeconds * 1000 - now) / 1000));
-    hitStore.set(key, timestamps);
+    hitStore.set(key, timestamps.slice(-maxRequests));
     return { isAllowed: false, remaining: 0, retryAfter };
   }
 
   timestamps.push(now);
-  hitStore.set(key, timestamps);
+  hitStore.set(key, timestamps.slice(-maxRequests));
 
   // Periodically prune stale keys to prevent memory leak
-  if (hitStore.size > 2000) {
+  if (hitStore.size > 1000) {
     hitStore.forEach((tsList, k) => {
       const valid = tsList.filter((t) => t > cutoff);
       if (valid.length === 0) {
@@ -189,6 +193,26 @@ function checkRateLimit(
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 1. STRICT GUARD: Rate limiting applies ONLY to /api/* endpoints.
+  // Immediately pass through for:
+  // - Root page ('/')
+  // - Next.js internal resources ('/_next/*')
+  // - Non-API page routes ('/login', '/signup', etc.)
+  // - Static assets, images, favicon, CSS, JS chunks (paths containing file extensions)
+  if (
+    !pathname.startsWith("/api/") ||
+    pathname === "/" ||
+    pathname.startsWith("/_next/") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  // 2. Health check exemption
+  if (pathname === "/api/health" || pathname === "/api/health/") {
+    return NextResponse.next();
+  }
 
   const rule = getRuleForPath(pathname, request.method);
   if (!rule) {
@@ -228,16 +252,7 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-ratelimit-limit", rule.maxRequests.toString());
-  requestHeaders.set("x-ratelimit-remaining", remaining.toString());
-  requestHeaders.set("x-ratelimit-reset", rule.windowSeconds.toString());
-
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  const response = NextResponse.next();
   response.headers.set("X-RateLimit-Limit", rule.maxRequests.toString());
   response.headers.set("X-RateLimit-Remaining", remaining.toString());
   response.headers.set("X-RateLimit-Reset", rule.windowSeconds.toString());
@@ -247,7 +262,7 @@ export function middleware(request: NextRequest) {
 /**
  * Matcher configuration:
  * Strictest possible matcher applying ONLY to /api/* routes.
- * Guaranteed never to match /_next, favicon, public files, or main pages.
+ * Guaranteed never to match /, /_next, favicon, public files, or main pages.
  */
 export const config = {
   matcher: ["/api/:path*"],
